@@ -1,0 +1,1879 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Lewis Block" />
+<title>Lewis — Training App</title>
+<style>
+:root {
+  --navy:#1A3560; --teal:#007B8A; --gold:#9A6B00; --green:#1B5E20;
+  --purple:#4A235A; --orange:#8C4A00; --red:#8B0000;
+  --navy-bg:#EBF2F8; --teal-bg:#E0F4F6; --gold-bg:#FFF8E1;
+  --green-bg:#E8F5E9; --purple-bg:#F5EEF8; --orange-bg:#FFF3E0;
+  --red-bg:#FDEDED; --grey:#F5F5F5; --border:#E0E0E0;
+  --text:#1a1a1a; --muted:#666; --white:#fff;
+  --safe-top:env(safe-area-inset-top); --safe-bot:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;
+  background:#F2F2F7;color:var(--text);min-height:100vh;
+  padding-bottom:calc(82px + var(--safe-bot));
+}
+.app-header{
+  background:var(--navy);padding:calc(var(--safe-top) + 14px) 16px 14px;
+  position:sticky;top:0;z-index:100
+}
+.app-header h1{font-size:17px;font-weight:600;color:#fff;letter-spacing:-.3px}
+.app-header p{font-size:12px;color:rgba(255,255,255,.65);margin-top:2px}
+.view{display:none;padding:12px}
+.view.active{display:block}
+.card{
+  background:var(--white);border-radius:14px;padding:14px 16px;margin-bottom:10px;
+  box-shadow:0 1px 3px rgba(0,0,0,.08)
+}
+.section-heading{font-size:15px;font-weight:700;color:var(--text);padding:2px 2px 10px}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.stat-card{background:var(--white);border-radius:12px;padding:10px 8px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.stat-card .num{font-size:22px;font-weight:700;color:var(--navy);line-height:1}
+.stat-card .lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
+.progress-bar-bg{background:var(--border);border-radius:99px;height:6px;overflow:hidden;margin-bottom:12px}
+.progress-bar-fill{background:var(--teal);height:100%;border-radius:99px;transition:width .4s ease}
+.week-tabs{display:flex;gap:6px;margin-bottom:10px}
+.week-tab{flex:1;padding:8px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.active-tab{background:var(--navy);color:#fff}
+.inactive-tab{background:var(--white);color:var(--muted);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.cat-card{
+  background:var(--white);border-radius:14px;padding:16px 14px;box-shadow:0 1px 3px rgba(0,0,0,.08);
+  cursor:pointer;display:flex;flex-direction:column;gap:6px
+}
+.cat-icon{font-size:28px}
+.cat-name{font-size:14px;font-weight:700;color:var(--text)}
+.cat-count{font-size:12px;color:var(--muted)}
+.back-btn{
+  display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--teal);
+  font-size:15px;font-weight:600;cursor:pointer;padding:0 0 12px;margin-left:-2px
+}
+.routine-list-item,.task-pill{
+  background:var(--white);border-radius:12px;padding:12px 14px;margin-bottom:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;align-items:center;gap:12px;cursor:pointer
+}
+.task-pill.done{opacity:.62}
+.pill-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.rli-info,.tp-main{flex:1;min-width:0}
+.rli-title,.tp-name{font-size:14px;font-weight:600;color:var(--text)}
+.rli-meta,.tp-meta{font-size:12px;color:var(--muted);margin-top:1px}
+.rli-arrow,.pill-arrow{font-size:14px;color:#ccc}
+.routine-title-card{border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.routine-title-card h2{font-size:20px;font-weight:700;color:#fff}
+.routine-title-card p{font-size:13px;color:rgba(255,255,255,.85);margin-top:4px}
+.routine-meta-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.rmeta{background:rgba(255,255,255,.2);border-radius:99px;padding:3px 10px;font-size:11px;font-weight:600;color:#fff}
+.sec-divider{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:14px 4px 6px}
+.ex-card{background:var(--white);border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ex-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer}
+.ex-header:active{background:#F9F9F9}
+.ex-num,.step-num{
+  width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;flex-shrink:0;margin-right:10px
+}
+.step-num{width:20px;height:20px;font-size:10px;margin-right:0;margin-top:1px}
+.ex-main{flex:1;min-width:0}
+.ex-name{font-size:14px;font-weight:600;color:var(--text)}
+.ex-load{font-size:12px;color:var(--muted);margin-top:1px}
+.ex-chevron{font-size:12px;color:#bbb;transition:transform .2s;flex-shrink:0}
+.ex-chevron.open{transform:rotate(180deg)}
+.ex-body{display:none;padding:0 14px 14px;border-top:1px solid #F5F5F5}
+.ex-body.open{display:block}
+.ex-step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #F8F8F8}
+.ex-step:last-child{border-bottom:none}
+.ex-step p{font-size:13px;color:var(--text);line-height:1.5}
+.cue-box{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:8px 10px;margin-top:8px}
+.cue-box p{font-size:12px;color:var(--gold);font-weight:600;line-height:1.4}
+.cue-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.day-list{display:flex;flex-direction:column;gap:8px}
+.day-card{
+  background:var(--white);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden;
+  border:1.5px solid transparent;transition:border-color .2s
+}
+.day-card.complete{border-color:#4CAF50}
+.day-header{display:flex;align-items:center;padding:13px 14px;cursor:pointer;gap:10px;user-select:none}
+.day-info{flex:1;min-width:0}
+.day-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.day-title{font-size:14px;font-weight:600;color:var(--text);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day-badges{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap}
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.02em}
+.b-gym{background:var(--navy-bg);color:var(--navy)}
+.b-field{background:var(--green-bg);color:var(--green)}
+.b-film{background:var(--purple-bg);color:var(--purple)}
+.b-rest{background:var(--grey);color:var(--muted)}
+.b-double{background:var(--orange-bg);color:var(--orange)}
+.chevron{font-size:13px;color:#bbb;flex-shrink:0;transition:transform .2s}
+.chevron.open{transform:rotate(180deg)}
+.day-body{display:none;border-top:1px solid #F0F0F0}
+.day-body.open{display:block}
+.section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:12px 14px 6px}
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:9px 14px;border-bottom:1px solid #F8F8F8;cursor:pointer}
+.check-item:active{background:#F5F5F5}
+.check-box{
+  width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--white)
+}
+.check-box.checked{background:var(--teal);border-color:var(--teal)}
+.check-box.checked::after{content:'';width:6px;height:10px;border:2.5px solid white;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);display:block}
+.check-label{font-size:14px;color:var(--text);line-height:1.45;flex:1;transition:color .15s}
+.check-label.done{color:#bbb;text-decoration:line-through}
+.monitoring{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 0;background:#FAFAFA;border-bottom:1px solid #F0F0F0
+}
+.mon-field.wide{grid-column:1 / -1}
+.mon-field label{display:block;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.mon-field select,.mon-field input{
+  width:100%;font-size:13px;padding:8px 6px;border-radius:8px;border:1px solid var(--border);
+  background:var(--white);color:var(--text);-webkit-appearance:none;text-align:center
+}
+.mon-save-row{padding:8px 14px 10px;background:#FAFAFA;border-bottom:1px solid #F0F0F0}
+.mon-save-btn{
+  width:100%;padding:10px;border-radius:10px;border:none;background:var(--navy);color:white;
+  font-size:13px;font-weight:600;cursor:pointer
+}
+.reset-btn{
+  display:block;width:calc(100% - 24px);margin:12px auto;padding:12px;background:#FF3B30;color:white;
+  border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer
+}
+.log-card{background:var(--white);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:10px;overflow:hidden}
+.log-header{padding:10px 14px;background:var(--navy-bg);font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em}
+.log-row{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #F5F5F5;font-size:13px;gap:10px}
+.log-row:last-child{border-bottom:none}
+.kick-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #F5F5F5}
+.kick-row:last-child{border-bottom:none}
+.kick-name{font-size:13px;font-weight:500;color:var(--text)}
+.kick-inputs{display:flex;align-items:center;gap:6px}
+.kick-inputs input{width:42px;text-align:center;font-size:13px;padding:5px 2px;border:1px solid var(--border);border-radius:6px;background:var(--white)}
+.kick-slash{font-size:13px;color:var(--muted)}
+.kick-pct{font-size:12px;font-weight:600;width:40px;text-align:right;color:var(--teal)}
+.hevy-note{margin:8px 14px 0;padding:9px 10px;background:var(--navy-bg);color:var(--navy);border-radius:10px;font-size:12px;font-weight:600}
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;justify-content:space-around;
+  padding:8px 0 calc(8px + var(--safe-bot));z-index:200
+}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;padding:4px 10px;border-radius:10px;min-width:56px}
+.nav-btn .ni{font-size:20px;color:#bbb}
+.nav-btn .nl{font-size:10px;color:#bbb;font-weight:500}
+.nav-btn.active .ni,.nav-btn.active .nl{color:var(--navy)}
+.nav-btn.active .nl{font-weight:700}
+.session-start-btn{width:100%;padding:12px;border:none;border-radius:12px;background:var(--teal);color:white;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px}
+.flow-card{background:var(--white);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.flow-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.flow-step{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.flow-title{font-size:18px;font-weight:700;color:var(--navy)}
+.flow-actions{display:flex;gap:8px;margin-top:12px}
+.flow-actions button{flex:1;padding:12px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.done-btn{background:var(--teal);color:#fff}
+.skip-btn{background:var(--grey);color:var(--text)}
+.mini-progress-wrap{margin:10px 0 12px}
+.mini-progress-label{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.today-nav-row{
+  position:sticky;bottom:70px;display:flex;gap:10px;background:linear-gradient(to top, rgba(242,242,247,.97), rgba(242,242,247,.85));
+  padding:14px 0 14px;z-index:50
+}
+.today-arrow{flex:1;padding:12px;border:none;border-radius:12px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.routine-actions{display:flex;gap:8px;margin:10px 0 14px}
+.routine-action-btn{flex:1;padding:12px;border:none;border-radius:12px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.routine-action-btn.secondary{background:var(--grey);color:var(--text)}
+.inline-confirm{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:12px}
+.inline-confirm-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.inline-confirm-actions{display:flex;gap:8px;margin-top:10px}
+.inline-confirm-actions button{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.confirm-danger{background:#FF3B30;color:#fff}
+.confirm-cancel{background:var(--grey);color:var(--text)}
+#today-sessions{padding-bottom:88px;min-height:40px}
+.save-state-btn.saved{background:var(--teal)!important}
+.gym-ex-list{
+  margin:10px 14px 14px 18px;
+  padding:12px 12px 4px;
+  border-radius:14px;
+  background:linear-gradient(135deg,#f6faff 0%, #eef5fc 100%);
+  border:1px solid rgba(26,53,96,.08);
+}
+.gym-ex-title{
+  font-size:11px;
+  font-weight:800;
+  color:var(--navy);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:8px;
+}
+.gym-ex-block{margin-bottom:10px}
+.gym-ex-block:last-child{margin-bottom:4px}
+.gym-ex-block-title{
+  font-size:11px;
+  font-weight:800;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin-bottom:6px;
+}
+.gym-ex-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  padding:7px 0;
+  border-top:1px solid rgba(26,53,96,.06);
+}
+.gym-ex-row:first-of-type{border-top:none}
+.gym-ex-name{
+  font-size:13px;
+  font-weight:600;
+  color:var(--text);
+  line-height:1.35;
+}
+.gym-ex-load{
+  font-size:12px;
+  font-weight:700;
+  color:var(--navy);
+  white-space:nowrap;
+}
+
+body{
+  background:
+    radial-gradient(circle at top, rgba(26,53,96,.06), transparent 28%),
+    linear-gradient(180deg, #F7F8FC 0%, #F2F2F7 45%, #EEF1F7 100%);
+}
+.app-header{
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,.14), transparent 30%),
+    linear-gradient(135deg, var(--navy) 0%, #274b83 62%, var(--teal) 100%);
+  box-shadow:0 8px 24px rgba(26,53,96,.18)
+}
+.card{
+  border:1px solid rgba(26,53,96,.06);
+  box-shadow:0 6px 18px rgba(18,26,45,.06)
+}
+.mini-progress-wrap{
+  background:rgba(255,255,255,.7);
+  border:1px solid rgba(26,53,96,.05);
+  border-radius:16px;
+  padding:12px 14px;
+  margin-bottom:12px;
+  backdrop-filter: blur(8px);
+}
+.progress-bar-bg{
+  background:linear-gradient(90deg, rgba(26,53,96,.08), rgba(26,53,96,.12));
+  height:7px;
+}
+.progress-bar-fill{
+  background:linear-gradient(90deg, var(--teal), #19a6b6);
+  box-shadow:0 4px 10px rgba(0,123,138,.25);
+}
+.today-section-card{
+  position:relative;
+  overflow:hidden;
+}
+.today-section-card::before{
+  content:'';
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width:4px;
+  background:linear-gradient(180deg, var(--teal), var(--navy));
+  opacity:.9;
+}
+.today-section-head{
+  padding:15px 16px 15px 18px;
+}
+.today-section-title{
+  letter-spacing:-.02em;
+}
+.today-section-pct{
+  background:var(--navy-bg);
+  color:var(--navy);
+  padding:7px 10px;
+  border-radius:12px;
+  min-width:58px;
+}
+.check-item{
+  padding:11px 16px 11px 18px;
+}
+.check-box{
+  border-color:#c9d4e2;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.03);
+}
+.check-box.checked{
+  background:linear-gradient(135deg, var(--teal), #16a2b1);
+}
+.week-tabs{
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(26,53,96,.05);
+  padding:4px;
+  border-radius:14px;
+  box-shadow:0 4px 12px rgba(18,26,45,.04)
+}
+.active-tab{
+  background:linear-gradient(135deg, var(--navy), #2d5a98);
+  box-shadow:0 4px 10px rgba(26,53,96,.18)
+}
+.inactive-tab{
+  background:transparent;
+  box-shadow:none;
+}
+.progress-banner{
+  border:1px solid rgba(255,255,255,.08);
+}
+.progress-banner-stat{
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.prog-card{
+  position:relative;
+  overflow:hidden;
+}
+.prog-card::after{
+  content:'';
+  position:absolute;
+  right:-25px; top:-25px;
+  width:90px; height:90px;
+  background:radial-gradient(circle, rgba(26,53,96,.07), transparent 70%);
+}
+.prog-score{
+  box-shadow:0 6px 14px rgba(26,53,96,.08);
+}
+.prog-cat{
+  box-shadow:0 6px 12px rgba(0,0,0,.08);
+}
+.routine-list-item,.task-pill,.log-card,.cat-card{
+  border:1px solid rgba(26,53,96,.05);
+  box-shadow:0 6px 16px rgba(18,26,45,.05)
+}
+.bottom-nav{
+  background:rgba(255,255,255,.88);
+  border-top:1px solid rgba(26,53,96,.08);
+  box-shadow:0 -6px 24px rgba(18,26,45,.06)
+}
+.nav-btn.active{
+  background:rgba(26,53,96,.06);
+}
+.nav-btn.active .ni,.nav-btn.active .nl{
+  color:var(--navy);
+}
+.log-header{
+  background:linear-gradient(90deg, var(--navy-bg), #f5f8fc);
+}
+.kick-row,.log-row{
+  padding-top:10px;
+  padding-bottom:10px;
+}
+.mon-save-btn,.session-start-btn,.routine-action-btn,.today-arrow{
+  box-shadow:0 8px 18px rgba(26,53,96,.12);
+}
+.mon-save-btn{
+  background:linear-gradient(135deg, var(--navy), #2b5793);
+}
+.today-arrow{
+  background:linear-gradient(135deg, var(--navy), #2b5793);
+}
+
+.check-item{cursor:pointer}
+.check-item:hover{background:#F7F9FC}
+.check-item:active{background:#EEF3FA}
+
+.cat-strip{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px
+}
+.cat-mini-card{
+  border-radius:16px;padding:12px 14px;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.08)
+}
+.cat-mini-top{
+  display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:rgba(255,255,255,.82)
+}
+.cat-mini-pct{
+  font-size:28px;font-weight:800;line-height:1;margin-top:8px
+}
+.cat-mini-meta{
+  font-size:12px;color:rgba(255,255,255,.8);margin-top:5px
+}
+
+.today-section-card{
+  background:var(--white);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.06);
+  overflow:hidden;margin-bottom:10px;border:1px solid rgba(26,53,96,.06)
+}
+.today-section-head{
+  display:flex;align-items:center;gap:10px;padding:14px 14px;cursor:pointer
+}
+.today-section-info{flex:1;min-width:0}
+.today-section-kicker{
+  font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em
+}
+.today-section-title{
+  font-size:15px;font-weight:800;color:var(--text);margin-top:2px
+}
+.today-section-meta{
+  font-size:12px;color:var(--muted);margin-top:3px
+}
+.today-section-pct{
+  min-width:54px;text-align:right;font-size:13px;font-weight:800;color:var(--teal)
+}
+.today-section-body{display:none;border-top:1px solid #F0F0F0}
+.today-section-body.open{display:block}
+
+.progress-shell{display:flex;flex-direction:column;gap:12px}
+.progress-banner{
+  border-radius:22px;padding:18px 16px 16px;color:#fff;
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,.18), transparent 32%),
+    linear-gradient(135deg, var(--navy) 0%, #274b83 48%, var(--teal) 100%);
+  box-shadow:0 12px 26px rgba(26,53,96,.18)
+}
+.progress-banner-kicker{
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.72)
+}
+.progress-banner-title{
+  font-size:25px;font-weight:800;line-height:1.02;margin-top:4px;letter-spacing:-.03em
+}
+.progress-banner-sub{
+  font-size:13px;line-height:1.42;color:rgba(255,255,255,.82);margin-top:7px
+}
+.progress-banner-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px
+}
+.progress-banner-stat{
+  background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.16);
+  border-radius:14px;padding:10px 10px 9px
+}
+.progress-banner-stat .num{font-size:20px;font-weight:800;line-height:1;color:#fff}
+.progress-banner-stat .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.74);margin-top:4px}
+
+.progress-grid{display:flex;flex-direction:column;gap:10px}
+.prog-card{
+  background:var(--white);border-radius:18px;padding:14px 14px 12px;
+  box-shadow:0 4px 16px rgba(0,0,0,.06);border:1px solid rgba(26,53,96,.06)
+}
+.prog-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.prog-left{min-width:0}
+.prog-kicker{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.prog-title{font-size:15px;font-weight:800;color:var(--text);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog-date{font-size:12px;color:var(--muted);margin-top:2px}
+.prog-score{
+  min-width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--navy-bg),#fff);color:var(--navy);font-size:18px;font-weight:800
+}
+.prog-bar-label{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.prog-cat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.prog-cat{
+  border-radius:14px;padding:10px 10px 9px;color:#fff;min-height:74px;display:flex;flex-direction:column;justify-content:space-between
+}
+.prog-cat-name{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.82)}
+.prog-cat-pct{font-size:22px;font-weight:800;line-height:1}
+.prog-cat-meta{font-size:11px;color:rgba(255,255,255,.8)}
+.pc-stretch{background:linear-gradient(135deg,#6E40B7,#8B67D3)}
+.pc-gym{background:linear-gradient(135deg,#204A8C,#3C67AE)}
+.pc-field{background:linear-gradient(135deg,#1E7B31,#349557)}
+.pc-film{background:linear-gradient(135deg,#5A2B79,#7E44A1)}
+.pc-recovery{background:linear-gradient(135deg,#0C7F8B,#1A9CAB)}
+
+.today-section-card{
+  background:var(--white);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.06);
+  overflow:hidden;margin-bottom:10px;border:1px solid rgba(26,53,96,.06)
+}
+.today-section-head{
+  display:flex;align-items:center;gap:10px;padding:14px 14px;cursor:pointer
+}
+.today-section-info{flex:1;min-width:0}
+.today-section-kicker{
+  font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em
+}
+.today-section-title{
+  font-size:15px;font-weight:800;color:var(--text);margin-top:2px
+}
+.today-section-meta{
+  font-size:12px;color:var(--muted);margin-top:3px
+}
+.today-section-pct{
+  min-width:54px;text-align:right;font-size:13px;font-weight:800;color:var(--teal)
+}
+.today-section-body{display:none;border-top:1px solid #F0F0F0}
+.today-section-body.open{display:block}
+
+.progress-shell{display:flex;flex-direction:column;gap:12px}
+.progress-banner{
+  border-radius:20px;padding:18px 16px;color:#fff;
+  background:linear-gradient(135deg,var(--navy) 0%, #274b83 48%, var(--teal) 100%);
+  box-shadow:0 12px 26px rgba(26,53,96,.18)
+}
+.progress-banner-kicker{
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.72)
+}
+.progress-banner-title{
+  font-size:25px;font-weight:800;line-height:1.02;margin-top:4px;letter-spacing:-.03em
+}
+.progress-banner-sub{
+  font-size:13px;line-height:1.42;color:rgba(255,255,255,.82);margin-top:7px
+}
+.progress-banner-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px
+}
+.progress-banner-stat{
+  background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.16);
+  border-radius:14px;padding:10px 10px 9px
+}
+.progress-banner-stat .num{font-size:20px;font-weight:800;line-height:1;color:#fff}
+.progress-banner-stat .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.74);margin-top:4px}
+
+.progress-grid{display:flex;flex-direction:column;gap:10px}
+.prog-card{
+  background:var(--white);border-radius:18px;padding:14px 14px 12px;
+  box-shadow:0 4px 16px rgba(0,0,0,.06);border:1px solid rgba(26,53,96,.06)
+}
+.prog-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.prog-left{min-width:0}
+.prog-kicker{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.prog-title{font-size:15px;font-weight:800;color:var(--text);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog-date{font-size:12px;color:var(--muted);margin-top:2px}
+.prog-score{
+  min-width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--navy-bg),#fff);color:var(--navy);font-size:18px;font-weight:800
+}
+.prog-bar-label{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.prog-cat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.prog-cat{
+  border-radius:14px;padding:10px 10px 9px;color:#fff;min-height:74px;display:flex;flex-direction:column;justify-content:space-between
+}
+.prog-cat-name{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.82)}
+.prog-cat-pct{font-size:22px;font-weight:800;line-height:1}
+.prog-cat-meta{font-size:11px;color:rgba(255,255,255,.8)}
+.pc-stretch{background:linear-gradient(135deg,#6E40B7,#8B67D3)}
+.pc-gym{background:linear-gradient(135deg,#204A8C,#3C67AE)}
+.pc-field{background:linear-gradient(135deg,#1E7B31,#349557)}
+.pc-film{background:linear-gradient(135deg,#5A2B79,#7E44A1)}
+.pc-recovery{background:linear-gradient(135deg,#0C7F8B,#1A9CAB)}
+
+.progress-hero{
+  background:linear-gradient(135deg,var(--navy) 0%, #325f9f 55%, var(--teal) 100%);
+  color:#fff;border-radius:18px;padding:18px 18px 16px;margin-bottom:14px;
+  box-shadow:0 10px 24px rgba(26,53,96,.18)
+}
+.progress-hero-top{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px
+}
+.progress-hero-kicker{
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.72)
+}
+.progress-hero-title{
+  font-size:24px;font-weight:800;line-height:1.05;margin-top:4px;letter-spacing:-.03em
+}
+.progress-hero-sub{
+  font-size:13px;color:rgba(255,255,255,.82);margin-top:6px;line-height:1.4
+}
+.progress-ring-chip{
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);
+  border-radius:16px;padding:10px 12px;min-width:94px;text-align:center
+}
+.progress-ring-chip .big{font-size:26px;font-weight:800;line-height:1}
+.progress-ring-chip .small{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.76);margin-top:4px}
+.progress-pill-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px
+}
+.progress-pill{
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);
+  border-radius:14px;padding:10px 10px 9px
+}
+.progress-pill .num{font-size:20px;font-weight:800;line-height:1;color:#fff}
+.progress-pill .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.72);margin-top:3px}
+.progress-week-grid{
+  display:grid;gap:10px
+}
+.progress-day-card{
+  background:var(--white);border-radius:18px;padding:14px 14px 12px;
+  box-shadow:0 4px 16px rgba(0,0,0,.06);border:1px solid rgba(26,53,96,.06)
+}
+.progress-day-top{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px
+}
+.progress-day-left{min-width:0}
+.progress-day-kicker{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)
+}
+.progress-day-title{
+  font-size:15px;font-weight:800;color:var(--text);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.progress-day-date{
+  font-size:12px;color:var(--muted);margin-top:2px
+}
+.progress-day-score{
+  min-width:58px;height:58px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:800;color:var(--navy);background:linear-gradient(135deg,var(--navy-bg),#fff)
+}
+.progress-day-bar-wrap{margin-bottom:10px}
+.progress-day-bar-label{
+  display:flex;justify-content:space-between;align-items:center;font-size:11px;
+  color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px
+}
+.mini-cat-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px
+}
+.mini-cat{
+  border-radius:12px;padding:10px 10px 9px;color:#fff;min-height:68px;
+  display:flex;flex-direction:column;justify-content:space-between
+}
+.mini-cat .name{
+  font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.82)
+}
+.mini-cat .pct{
+  font-size:22px;font-weight:800;line-height:1;margin-top:6px
+}
+.mini-cat .meta{
+  font-size:11px;color:rgba(255,255,255,.78)
+}
+.mini-stretch{background:linear-gradient(135deg,#6C3AB2,#8C63D2)}
+.mini-gym{background:linear-gradient(135deg,#1F4A8A,#3B67AD)}
+.mini-field{background:linear-gradient(135deg,#1F7A2E,#349154)}
+.mini-film{background:linear-gradient(135deg,#5B2A77,#7A43A0)}
+.mini-recovery{background:linear-gradient(135deg,#0B7F8C,#1A9AAA)}
+
+
+.hero-card{
+  background:linear-gradient(135deg, var(--navy) 0%, #254a84 55%, var(--teal) 100%);
+  color:#fff;border-radius:18px;padding:18px 16px 16px;margin-bottom:12px;
+  box-shadow:0 10px 24px rgba(26,53,96,.22)
+}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.hero-kicker{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.74)}
+.hero-day{font-size:26px;font-weight:800;line-height:1.05;margin-top:4px}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.84);margin-top:4px;line-height:1.35}
+.hero-pill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.18);padding:7px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.cat-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px}
+.cat-progress-card{
+  border-radius:16px;padding:12px 12px 10px;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.10)
+}
+.cat-progress-card .cp-label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.82)}
+.cat-progress-card .cp-pct{font-size:22px;font-weight:800;line-height:1;margin-top:6px}
+.cat-progress-card .cp-meta{font-size:11px;color:rgba(255,255,255,.82);margin-top:4px}
+.tsec-card{
+  background:var(--white);border-radius:18px;box-shadow:0 4px 14px rgba(0,0,0,.08);
+  overflow:hidden;margin-bottom:10px;border:1px solid rgba(0,0,0,.03)
+}
+.tsec-head{display:flex;align-items:center;gap:12px;padding:14px 14px 13px;cursor:pointer}
+.tsec-icon{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+.tsec-info{flex:1;min-width:0}
+.tsec-kicker{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.tsec-title{font-size:15px;font-weight:700;color:var(--text);margin-top:3px}
+.tsec-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.tsec-pct{text-align:right;min-width:58px}
+.tsec-pct .num{font-size:18px;font-weight:800;color:var(--navy);line-height:1}
+.tsec-pct .txt{font-size:11px;color:var(--muted);margin-top:2px}
+.tsec-body{display:none;border-top:1px solid #F1F1F4;background:linear-gradient(180deg,#fff 0%, #FBFBFD 100%)}
+.tsec-body.open{display:block}
+.tsec-progress-wrap{margin-top:8px}
+.tsec-progress-label{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:5px}
+.progress-page-head{
+  background:linear-gradient(135deg, #fff 0%, #eef4fb 100%);
+  border-radius:18px;padding:14px 14px 12px;margin-bottom:10px;box-shadow:0 4px 14px rgba(0,0,0,.06)
+}
+.week-stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.week-stat{
+  background:#fff;border-radius:14px;padding:10px 8px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05)
+}
+.week-stat .ws-num{font-size:22px;font-weight:800;color:var(--navy);line-height:1}
+.week-stat .ws-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+.progress-day-card{
+  background:#fff;border-radius:18px;padding:14px 14px 12px;box-shadow:0 4px 14px rgba(0,0,0,.06);margin-bottom:10px
+}
+.progress-day-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.progress-day-title{font-size:15px;font-weight:700;color:var(--text)}
+.progress-day-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.progress-cat-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.progress-cat-mini{
+  background:#F8FAFD;border-radius:12px;padding:9px 10px;border:1px solid #EEF1F5
+}
+.progress-cat-mini .pcm-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.progress-cat-mini .pcm-name{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.progress-cat-mini .pcm-pct{font-size:12px;font-weight:800;color:var(--navy)}
+
+</style>
+</head>
+<body>
+<div class="app-header">
+  <h1>Lewis — Combined Block App</h1>
+  <p id="header-sub">Fullback block tracker • today tracker • progress • library • kicking • monitoring</p>
+</div>
+
+
+<div class="view active" id="view-today">
+  <div class="hero-card">
+    <div class="hero-top">
+      <div>
+        <div class="hero-kicker">Today</div>
+        <div class="hero-day" id="today-day-lbl">Day 1</div>
+        <div class="hero-sub" id="today-sub-lbl">Monday 6 April</div>
+      </div>
+      <div class="hero-pill" id="today-hero-pill">0% Complete</div>
+    </div>
+    <div class="tsec-progress-wrap">
+      <div class="tsec-progress-label" style="color:rgba(255,255,255,.82)">Daily Progress</div>
+      <div class="progress-bar-bg" style="background:rgba(255,255,255,.18)"><div class="progress-bar-fill" id="today-prog-fill" style="width:0%;background:#fff"></div></div>
+    </div>
+  </div>
+    <div id="today-sections"></div>
+  <div class="today-nav-row">
+    <button class="today-arrow" onclick="changeSelectedDay(-1)">◀ Previous</button>
+    <button class="today-arrow" onclick="changeSelectedDay(1)">Next ▶</button>
+  </div>
+</div>
+
+
+
+<div class="view" id="view-progress">
+  <div class="week-tabs">
+    <button class="week-tab active-tab" id="tab-w1" onclick="showWeek(1)">Week 1</button>
+    <button class="week-tab inactive-tab" id="tab-w2" onclick="showWeek(2)">Week 2</button>
+  </div>
+  <div id="progress-content"></div>
+</div>
+
+<div class="view" id="view-library">
+
+<div class="cat-grid" id="cat-grid"></div></div>
+
+<div class="view" id="view-routines">
+  <button class="back-btn" onclick="backToLibrary()">‹ Library</button>
+  <div id="routine-list-title" style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:10px"></div>
+  <div id="routine-list"></div>
+</div>
+
+<div class="view" id="view-detail">
+  <button class="back-btn" id="detail-back-btn" onclick="backToRoutines()">‹ Back</button>
+  <div id="detail-content"></div>
+</div>
+
+<div class="view" id="view-kicking">
+  <div class="section-heading">Conversion Kicking Log</div>
+  <div class="card small muted" style="line-height:1.45">Track makes and attempts for Days 1, 3, 6, 8, 10 and 13. Day 14 stays light and is not part of the main comparison log.</div>
+  <div id="kicking-log"></div>
+</div>
+
+<div class="view" id="view-monitoring">
+  <div class="section-heading">Daily Monitoring Log</div>
+  <div class="card small muted" style="line-height:1.45">Use readiness 1-5, hamstring status, sleep, session RPE and sprint quality. If readiness is 2 or lower, recovery replaces the full session.</div>
+  <div id="monitoring-log"></div>
+  <div id="reset-confirm-wrap"></div>
+  <button class="reset-btn" onclick="confirmReset()">Reset Block Progress</button>
+</div>
+
+
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-today" onclick="showView('today')"><span class="ni">☀️</span><span class="nl">Today</span></button>
+  <button class="nav-btn" id="nav-progress" onclick="showView('progress')"><span class="ni">📈</span><span class="nl">Progress</span></button>
+  <button class="nav-btn" id="nav-library" onclick="showView('library')"><span class="ni">📚</span><span class="nl">Library</span></button>
+  <button class="nav-btn" id="nav-kicking" onclick="showView('kicking')"><span class="ni">🏉</span><span class="nl">Kicking</span></button>
+  <button class="nav-btn" id="nav-monitoring" onclick="showView('monitoring')"><span class="ni">📊</span><span class="nl">Monitor</span></button>
+</div>
+
+<script>
+
+const STORAGE_KEY = 'lewis_combined_block_updated_gym_v1';
+
+const APP_DEFAULT = {
+  selectedDay: 1,
+  week: 1,
+  checks: {},
+  openDay: null,
+  todayOpenSection: null,
+  monitoring: {},
+  kicking: {}
+};
+
+let APP = loadState();
+let currentCat = null;
+let currentRoutine = null;
+let detailBackTarget = 'routines';
+
+const CATS = [
+  { id:'stretch', icon:'🧘', name:'Stretch + Warm-Up' },
+  { id:'gym', icon:'🏋️', name:'Gym' },
+  { id:'field', icon:'🏉', name:'Field + Skills' },
+  { id:'film', icon:'🎬', name:'Film + Recovery' }
+];
+
+const ROUTINES = {
+  "1a": {
+    id:"1a", cat:"stretch", color:"#5C2D91", bg:"#F5EEF8",
+    title:"1A — Morning Routine",
+    subtitle:"Every day including rest days",
+    meta:["7-8 min","Dynamic only","No static holds"],
+    note:"Dynamic only. This stays the same. Use it to wake the system up, not to chase range.",
+    sections:[{ title:"Full Routine", exercises:[
+      { name:"Cat-Cow Spinal Wave", load:"60 sec", steps:["Move from rounded spine to extended spine slowly.","Breathe out on cat, breathe in on cow.","Continuous flow — do not force end range."], cue:"Smooth spinal motion." },
+      { name:"Hip Flexor Lunge Rock", load:"30 sec each side", steps:["Half-kneeling stance.","Small forward/back rock.","Feel the front of the hip, not the lower back."], cue:"Controlled hip opening." },
+      { name:"Lying Knee-to-Chest", load:"20 sec each side", steps:["Pull one knee in.","Keep the other leg relaxed.","Hold gently — no forcing."], cue:"Easy glute and hip release." },
+      { name:"Standing Hip Circle", load:"20 sec each direction", steps:["Hands on hips.","Draw slow circles.","Both directions."], cue:"Loosen the hip capsule." },
+      { name:"Shoulder Cross-Body Reach", load:"20 sec each side", steps:["Bring one arm across the chest.","Support at the elbow.","Keep shoulders square."], cue:"Rear shoulder only." },
+      { name:"Neck Semicircle", load:"30 sec total", steps:["Ear to shoulder on each side.","Chin to chest.","Do not roll the head backward."], cue:"Front and side only." },
+      { name:"Standing Toe Reach", load:"30 sec", steps:["Soft knee bend.","Hinge forward carefully.","Stop at first hamstring tension."], cue:"Gentle sweep, not forced." }
+    ]}]
+  },
+  "1b": {
+    id:"1b", cat:"stretch", color:"#5C2D91", bg:"#F5EEF8",
+    title:"1B — Night Routine",
+    subtitle:"Every night before bed",
+    meta:["7-8 min","Static holds","Recovery"],
+    note:"This stays the same. Keep it calm and consistent.",
+    sections:[{ title:"Full Routine", exercises:[
+      { name:"Kneeling Hip Flexor Stretch", load:"45 sec each side", steps:["Half-kneeling.","Shift hips forward slightly.","Squeeze the glute of the back leg."], cue:"Most important night stretch." },
+      { name:"Band-Assisted Hamstring Hold", load:"45 sec each side", steps:["Lie on back with band on foot.","Lift leg until mild pull.","Hold and breathe."], cue:"Mild pull only." },
+      { name:"90/90 Hip Stretch", load:"45 sec each side", steps:["Set both hips at 90/90.","Sit tall.","Hinge slightly over the front leg."], cue:"Deep hip rotator work." },
+      { name:"Child's Pose with Lat Reach", load:"30 sec each side", steps:["Sit back into child's pose.","Walk hands right, then left.","Breathe into the side body."], cue:"Open lats and shoulders." },
+      { name:"Lying Spinal Twist", load:"30 sec each side", steps:["Knees up.","Drop to one side.","Head looks opposite."], cue:"Spinal reset." },
+      { name:"Legs-Up-The-Wall", load:"2 min", steps:["Legs vertical against wall.","Relax fully.","Stay for the full two minutes."], cue:"Non-negotiable." }
+    ]}]
+  },
+  "1c": {
+    id:"1c", cat:"stretch", color:"#5C2D91", bg:"#F5EEF8",
+    title:"1C — Pre-Gym Warm-Up",
+    subtitle:"Before every gym session",
+    meta:["12-14 min","Foam roll first","Then activate"],
+    note:"Foam roll → dynamic mobility → shoulder activation → CNS primer. Keep this exactly the same conceptually.",
+    sections:[
+      { title:"Soft Tissue", exercises:[
+        { name:"Foam Roll: Quads + Glutes", load:"60 sec each", steps:["Roll quads slowly.","Sit on roller for glutes.","Pause on hot spots."], cue:"Do not rush." },
+        { name:"Foam Roll: Thoracic Spine", load:"60 sec", steps:["Roll mid-back only.","Small extensions over the roller.","Avoid lower back."], cue:"Opens pressing position." },
+        { name:"Lacrosse Ball: Glute/Piriformis", load:"45 sec each", steps:["Sit on the ball.","Cross ankle over knee.","Breathe into tight spots."], cue:"Great for hip quality." }
+      ]},
+      { title:"Dynamic Mobility + Activation", exercises:[
+        { name:"World's Greatest Stretch", load:"30 sec each side", steps:["Long lunge.","Rotate up toward ceiling.","Return and repeat."], cue:"Hits hips and T-spine together." },
+        { name:"Hip 90/90 Transition Flow", load:"60 sec", steps:["Move from one 90/90 to the other.","Stay tall.","Use hands lightly if needed."], cue:"Free the hips before loading." },
+        { name:"Leg Swings", load:"10 each direction", steps:["Front/back.","Side/side.","Control the torso."], cue:"Open hips without losing posture." },
+        { name:"Band Pull-Apart + External Rotation", load:"12 each", steps:["Pull band apart level with chest.","Then rotate hands back.","Slow control."], cue:"Shoulders ready to press and catch." }
+      ]}
+    ]
+  },
+  "1d": {
+    id:"1d", cat:"stretch", color:"#1B5E20", bg:"#E8F5E9",
+    title:"1D — Pre-Field Warm-Up",
+    subtitle:"Before field speed and skills",
+    meta:["8-10 min","Build gradually","Prime speed"],
+    note:"This uses the same pre-field warm-up structure, but now with much more explanation so the field work is easier to follow properly.",
+    sections:[{ title:"Warm-Up Flow", exercises:[
+      { name:"A-Skip + Ankling", load:"2 x 10m each", steps:["Set up a straight 10m lane with room to walk back.", "First do A-skips for 10m keeping posture tall and rhythm smooth.", "Walk back recovery rather than rushing straight into the next rep.", "Then do ankling for 10m with very small, quick contacts under the hips.", "Use the walk back to reset posture and breathing before repeating."], cue:"Rhythm and stiffness — hips tall, feet under you, not reaching out in front." },
+      { name:"Wall Drive Switches", load:"2 x 5 each side", steps:["Set hands on a wall at roughly shoulder height with body leaning forward in a straight line.", "Bring one knee up so the thigh is close to parallel and the toe is up.", "Switch sharply so the other knee drives through while the stance leg punches the floor back.", "Freeze each switch for a brief second so you actually hit the right position instead of just rushing it.", "Reset posture before the next rep."], cue:"Front-side mechanics — punch down under the hips and win the first step position." },
+      { name:"Build-Ups", load:"3 x 20m", steps:["Mark out 20m and build speed gradually rather than sprinting all-out from rep one.", "First rep is about 60% just to open up stride rhythm.", "Second rep is about 75% with slightly more intent through the ground.", "Third rep is about 85% so you feel fast and elastic without fatiguing yourself before the real work.", "Walk back recovery after each rep and stay relaxed through shoulders and face."], cue:"No max speed before the block starts — feel smoother and faster each rep." }
+    ]}]
+  },
+
+  "gymLA": {
+    id:"gymLA", cat:"gym", color:"#1A3560", bg:"#EBF2F8",
+    title:"Gym — Lower A",
+    subtitle:"Acceleration + force",
+    meta:["~65 min","Speed-strength","Fullback lower day"],
+    note:"Updated exactly to your final Lower A split. This is your acceleration and force day. Jumps stay fast and clean. No Nordics on this day anymore.",
+    sections:[
+      { title:"A Block — Explosive", exercises:[
+        { name:"Depth Jump", load:"3×5", steps:["Use a box height you can rebound from cleanly.","Step off rather than jump out.","Hit the ground and rebound fast.","Land quietly and stay tall through the torso."], cue:"Fast off the floor. Do not sink." },
+        { name:"Broad Jump", load:"3×4", steps:["Start in an athletic stance with feet hip-width.","Load hips back slightly.","Swing arms hard.","Stick the landing with balance."], cue:"Project horizontally, not upward." },
+        { name:"Lateral Bound → Stick", load:"3×4 each side", steps:["Start balanced on one leg.","Push hard sideways.","Land on one leg with knee tracking over foot.","Freeze the landing before the next rep."], cue:"Own the landing — fullback footwork transfer." },
+        { name:"Hip Flexor Leg Drives", load:"3×10 each", steps:["Set up beside a rack or wall for balance.","Band around foot or ankle if available.","Stand tall with ribs down.","Drive knee hard upward.","Control the return down."], cue:"Sharp knee drive, no torso swing." }
+      ]},
+      { title:"B Block — Strength / Power", exercises:[
+        { name:"Trap Bar Jump", load:"4×4", steps:["Use a light enough load to stay explosive.","Set handles evenly and brace before each rep.","Dip slightly.","Jump as fast as possible every rep.","Reset fully between reps."], cue:"Speed first, load second." },
+        { name:"Hang Power Clean", load:"4×3", steps:["Start from hang above the knee.","Brace and push through the floor.","Violent extension.","Catch clean with tall chest and elbows through."], cue:"Snap, don’t muscle it." },
+        { name:"Quarter Squat Jump", load:"3×6", steps:["Set the bar like a squat but use a very light load.","Quarter dip only.","Drive hard and leave the floor.","Reset and re-brace each rep."], cue:"This is sprint transfer work — keep it light and fast." },
+        { name:"RDL", load:"3×6", steps:["Start from the rack or floor with lats locked in.","Soft knees.","Push hips back.","Bar stays close to legs.","Stop where hamstrings are loaded but back stays neutral."], cue:"Hamstrings loaded, spine neutral." },
+        { name:"Standing Calf Raise", load:"3×8", steps:["Set feet evenly on platform edge.","Full stretch at bottom.","Drive up hard.","Lower under control."], cue:"Stiff ankles help speed." }
+      ]},
+      { title:"C Block — Robustness", exercises:[
+        { name:"Leg Raises", load:"2×12", steps:["Brace ribs down.","Lift without swinging.","Lower slowly."], cue:"Front-core control." },
+        { name:"Plank Hold", load:"2×40 sec", steps:["Elbows under shoulders.","Squeeze glutes.","Keep hips level."], cue:"Straight line, no sag." }
+      ]}
+    ]
+  },
+
+  "gymUA": {
+    id:"gymUA", cat:"gym", color:"#1A3560", bg:"#EBF2F8",
+    title:"Gym — Upper A",
+    subtitle:"Push dominant + rotational power",
+    meta:["~65 min","Explosive upper","Push dominant"],
+    note:"Updated to your final Upper A split. Incline stays, flat DB is out of this day, and weighted dips are in.",
+    sections:[
+      { title:"A Block — Explosive", exercises:[
+        { name:"Plyo Push-Up", load:"4×5", steps:["Hands under shoulders.","Brace trunk and squeeze glutes.","Drop under control.","Explode so hands leave the floor.","Land softly and reset."], cue:"Violent push, crisp landing." },
+        { name:"Med Ball Rotational Scoop Throw", load:"4×5 each side", steps:["Load the hip.","Rotate hard.","Release fast through the wall or partner."], cue:"Hips start it, arms finish it." },
+        { name:"Box Jump", load:"3×4", steps:["Quarter dip.","Drive up.","Land soft on top."], cue:"Treat these like power reps, not conditioning." }
+      ]},
+      { title:"B Block — Strength", exercises:[
+        { name:"Push Press", load:"4×5", steps:["Bar starts on upper chest/front rack.","Small leg dip straight down.","Drive with legs then arms.","Lock out overhead with ribs down."], cue:"Full-body punch." },
+        { name:"Incline DB Press", load:"3×8", steps:["Shoulder blades set.","Lower with control.","Drive up hard."], cue:"Upper chest and strong shoulder position." },
+        { name:"Single-Arm DB Row", load:"4×8 each", steps:["Brace on bench.","Pull elbow to hip.","Control the lowering phase."], cue:"No torso twisting." },
+        { name:"Face Pull", load:"3×15", steps:["Pull to forehead.","Elbows high.","Pause briefly at the finish."], cue:"Shoulder health stays mandatory." },
+        { name:"Weighted Dips", load:"3×6", steps:["Use belt or hold DB safely if loading.","Slight forward lean.","Lower under control to a strong shoulder position.","Drive out hard."], cue:"Strong chest and triceps for contact." }
+      ]},
+      { title:"C Block — Robustness", exercises:[
+        { name:"Copenhagen Plank", load:"2×25 sec each", steps:["Top leg on bench.","Lift hips.","Hold square."], cue:"Adductor strength for speed and groin durability." },
+        { name:"Landmine 180", load:"3×8 each", steps:["Pivot through the feet.","Move the bar from hip to hip.","Brace between reps."], cue:"Rotational control, not just spin." },
+        { name:"Dead Hang", load:"2×40 sec", steps:["Relax shoulders gradually.","Breathe.","Do not swing."], cue:"Decompress and open the shoulder girdle." }
+      ]}
+    ]
+  },
+
+  "gymLB": {
+    id:"gymLB", cat:"gym", color:"#1A3560", bg:"#EBF2F8",
+    title:"Gym — Lower B",
+    subtitle:"Top speed + posterior power",
+    meta:["~70 min","Posterior chain","Top-speed support"],
+    note:"Updated exactly to your final Lower B split. Depth jumps are out, ankle pogos are in, and hip thrust now anchors the horizontal force work.",
+    sections:[
+      { title:"A Block — Explosive", exercises:[
+        { name:"Pogo Hops", load:"3×10", steps:["Feet hip-width.","Minimal knee bend.","Quick contacts.","Stay tall and stiff."], cue:"Bounce, don’t sink." },
+        { name:"Ankle Pogos", load:"3×12", steps:["Smaller amplitude than normal pogos.","Rapid contacts.","Stay stacked through ankle-knee-hip.","Arms relaxed."], cue:"Pure ankle stiffness." },
+        { name:"Band Resisted High Knee Drive", load:"2×8 each", steps:["Set band so tension starts from behind you.","Stand tall and brace.","Drive knee sharply.","Return under control."], cue:"Fast front-side mechanics." }
+      ]},
+      { title:"B Block — Strength / Power", exercises:[
+        { name:"Trap Bar Deadlift", load:"4×5", steps:["Set mid-foot under handles.","Brace hard before every rep.","Push floor away.","Finish with glutes.","Reset between reps if needed."], cue:"Strong but clean reps only." },
+        { name:"Hip Thrust (Machine)", load:"4×6", steps:["Adjust pad so hips line up comfortably.","Set feet so shins are near vertical at the top.","Chin tucked.","Drive hips through to full extension.","Pause briefly at lockout."], cue:"Horizontal force for sprint carryover." },
+        { name:"Bulgarian Split Squat", load:"3×6 each", steps:["Set rear foot on bench at a comfortable height.","Front foot planted far enough to keep balance.","Drop straight down.","Drive through mid-foot."], cue:"Control the bottom." },
+        { name:"Nordic Hamstring Curl", load:"3×5", steps:["Anchor ankles securely.","Body straight from knees to head.","Lower slowly.","Catch with hands if needed.","Push lightly off floor only enough to reset."], cue:"Fight the eccentric." },
+        { name:"Weighted Calf Raise", load:"3×6", steps:["Heavy but full range.","Pause at top.","Lower under control."], cue:"Heavy calf strength, not bouncing." }
+      ]},
+      { title:"C Block — Robustness", exercises:[
+        { name:"Copenhagen Plank", load:"2×25 sec each", steps:["Top leg supported.","Square hips.","Hold strong."], cue:"Adductor durability again." },
+        { name:"Pallof Press", load:"3×10 each", steps:["Stand tall.","Press band/cable straight out.","Resist rotation."], cue:"Anti-rotation core for speed and contact." }
+      ]}
+    ]
+  },
+
+  "gymUB": {
+    id:"gymUB", cat:"gym", color:"#1A3560", bg:"#EBF2F8",
+    title:"Gym — Upper B",
+    subtitle:"Athletic + pull dominant",
+    meta:["~60 min","Explosive upper","Pull emphasis"],
+    note:"Updated to your final Upper B split. Lat pulldown is removed. Explosive Pendlay row is now the added explosive pull.",
+    sections:[
+      { title:"A Block — Explosive", exercises:[
+        { name:"Med Ball Scoop Throw", load:"3×4 each", steps:["Load hips and torso.","Drive through the throw.","Reset fully between reps."], cue:"Violent hip-to-hand transfer." },
+        { name:"Single Leg Box Jump", load:"3×4 each", steps:["Start balanced on one leg.","Drive vertically.","Land softly on the box."], cue:"Single-leg power and stability." }
+      ]},
+      { title:"B Block — Strength", exercises:[
+        { name:"DB Bench Press", load:"3×6", steps:["Get set with shoulder blades pinned first.","Feet planted hard.","Lower under control.","Drive hard without losing position."], cue:"Strong, crisp reps." },
+        { name:"Chin-Ups", load:"3×6–8", steps:["Use full hang to chest up.","Brace lightly through the trunk.","Pull elbows down.","Lower with control."], cue:"Own the bottom and top positions." },
+        { name:"Landmine Press", load:"3×8 each", steps:["Use split stance if preferred.","Start hand near shoulder.","Press up and out.","Brace through the torso."], cue:"Athletic pressing angle." },
+        { name:"Smith Machine Bench Throws", load:"3×5", steps:["Set safeties and use a light load only.","Drive bar explosively.","Release only as safely as the setup allows.","Catch safely under control."], cue:"Pure upper-body power." },
+        { name:"Explosive Pendlay Row", load:"3×5", steps:["Bar starts on floor every rep.","Set feet under hips and hinge to flat back.","Pull fast to lower chest or upper stomach.","Pause bar back on floor.","Reset before the next rep."], cue:"Violent pull — do not grind these." }
+      ]},
+      { title:"C Block — Robustness", exercises:[
+        { name:"Dead Hang", load:"2×45 sec", steps:["Hang relaxed but controlled.","Breathe.","No swinging."], cue:"Shoulder decompression." },
+        { name:"Leg Raises", load:"2×12", steps:["Brace trunk.","Lift without momentum.","Lower slowly."], cue:"Finish with clean core work." }
+      ]}
+    ]
+  },
+
+  "speedW1": {
+    id:"speedW1", cat:"field", color:"#1B5E20", bg:"#E8F5E9",
+    title:"Speed — Week 1",
+    subtitle:"Days 1 + 3 | Acceleration into flying work",
+    meta:["10-15 min","Quality only","Full rest"],
+    note:"This keeps the same field speed exercises, but with much more explanation so each rep is clearer and easier to run properly.",
+    sections:[
+      { title:"Day 1 Speed Block", exercises:[
+        { name:"Wall Drive Sprint", load:"5×20m", steps:["Start with the same body angle you used in the wall drill so the first step matches the acceleration position you want.", "Explode out over 20m with intent, keeping the first few steps low and powerful.", "Drive arms aggressively and push the ground back rather than reaching forward.", "Let the body rise naturally instead of popping upright too early.", "Take full rest so every rep stays fast and technical."], cue:"Acceleration posture — project forward and win the first 3 steps." },
+        { name:"Falling Start Sprint", load:"4×20m", steps:["Stand tall, then lean forward until you genuinely have to step to catch yourself.", "As soon as you go, punch the first step hard into the ground.", "Keep the torso angled forward through the early acceleration phase.", "Run the full 20m with intent but stop the set if the start gets messy or slow.", "Rest fully between reps so the quality stays high."], cue:"Simple and game-realistic — clean first step, no false shuffle." }
+      ]},
+      { title:"Day 3 Speed Block", exercises:[
+        { name:"Standing Start Sprint", load:"5×20m", steps:["Set a comfortable split stance that feels athletic and balanced, not too long.", "Load the front side slightly and be ready to strike hard with the first step.", "Punch the ground aggressively on rep start and keep the torso projected forward.", "Drive hard for the first 3 steps, then let the body rise naturally as speed builds.", "Take enough rest that each rep still looks like a sprint, not conditioning."], cue:"Aggressive first 3 steps — push hard, don’t pop up." },
+        { name:"Flying 30", load:"4 reps", steps:["Set up a 20m build zone into a 30m fly zone.", "Use the first 20m to build speed smoothly rather than forcing it early.", "When you hit the fly zone, stay relaxed through the face, jaw and shoulders.", "Think quick contacts and tall hips while holding speed through the zone.", "Take full rest before the next rep so top speed quality stays high."], cue:"Top-end speed quality — relaxed fast, not tense fast." }
+      ]}
+    ]
+  },
+
+  "speedW2": {
+    id:"speedW2", cat:"field", color:"#1B5E20", bg:"#E8F5E9",
+    title:"Speed — Week 2 Max Velocity",
+    subtitle:"Days 8 + 10 | Flying 30-40",
+    meta:["15 min","Longer rest","Peak quality"],
+    note:"Same field speed intent stays in place.",
+    sections:[
+      { title:"Day 8 Speed Block", exercises:[
+        { name:"Wall Drive Sprint", load:"5×20m", steps:["Same quality as Week 1.","Stay smooth and sharp."], cue:"Mechanics first." },
+        { name:"Flying 30", load:"5 reps", steps:["Set up a controlled build-in before the max-speed zone.", "Use the build-up to rise naturally and feel rhythm before you hit the fly section.", "Once in the fast zone, keep posture tall and contacts sharp.", "If you start straining or overreaching, shut the rep down and reset.", "Stop the block if the quality clearly drops."], cue:"Fast and relaxed — speed should look smooth, not forced." }
+      ]},
+      { title:"Day 10 Speed Block", exercises:[
+        { name:"Flying 40", load:"4 reps", steps:["Set up a 20m build-up into a 20m max-speed zone.", "Build gradually so you enter the fly zone already moving well.", "Hold posture, rhythm and relaxation through the full fast section.", "Do not chase extra speed by reaching in front — stay under the hips.", "Take the full 4 minutes rest so this stays a real max-velocity block."], cue:"Peak top-speed exposure — quality matters more than squeezing out extra reps." },
+        { name:"Arc Sprint", load:"4 each side", steps:["Set two or three cones in a gentle curve to give yourself a clear running line.", "Accelerate into the curve without leaning so much that you lose balance.", "Keep the inside shoulder and hips following the arc naturally.", "As you exit the curve, open stride length and accelerate out cleanly.", "Do both sides evenly because fullback movement isn’t one-direction only."], cue:"Useful fullback running line — stay smooth through the bend, then burst out." }
+      ]},
+      { title:"Day 14 Activation", exercises:[
+        { name:"Light Build-Up Strides", load:"4×20m", steps:["Use these as activation only, not as hard speed work.", "Start the early reps around 60% and only build to about 85% at most.", "Focus on rhythm, bounce and feeling sharp through the ground.", "Rest plenty between reps so nothing feels rushed.", "Finish the block feeling fresher and more switched on, not tired."], cue:"Activation, not fatigue — this is about sharpness before play." }
+      ]}
+    ]
+  },
+
+  "agility": {
+    id:"agility", cat:"field", color:"#8C4A00", bg:"#FFF3E0",
+    title:"Agility — Reactive COD",
+    subtitle:"Reactive footwork and game changes of direction",
+    meta:["10 min","Sharp feet","Ball where possible"],
+    note:"This keeps the same agility menu, but with a lot more explanation so each COD drill actually makes sense when you run it.",
+    sections:[
+      { title:"Core Agility Menu", exercises:[
+        { name:"4-Cone Box React", load:"8-10 reps", steps:["Set four cones in a square and start in the middle in an athletic stance.", "Use a call, visual cue or your own random choice to decide which cone to attack.", "React instantly, move your feet fast and stay balanced through the first movement.", "Touch or run through the chosen cone depending on your setup.", "Finish each rep under control so the drill stays sharp rather than messy."], cue:"Fast feet, good posture — react, move, then control the finish." },
+        { name:"5-10-5 Shuttle", load:"6 reps", steps:["Set the middle start line with cones 5m either side and a 10m total change in direction section.", "Start square and explode to the first line with intent.", "Sink hips before each turn so you decelerate under control instead of slipping upright.", "Push hard off the outside foot to re-accelerate back across.", "Make every cut look game-realistic rather than just touching lines lazily."], cue:"Own decel before re-accel — brakes first, then power out." },
+        { name:"L-Drill Reactive", load:"6 each side", steps:["Set three cones in an L shape with enough room to accelerate around each turn.", "Start hard, then react to the route you’ve programmed or called late.", "Stay low into the turns and keep foot contacts underneath you.", "If using a ball, carry it as you would in a game instead of letting it wreck posture.", "Lift eyes on the exit so you finish like a player scanning space, not just a sprinter."], cue:"Eyes up on exit — turn fast, then find space." }
+      ]}
+    ]
+  },
+
+  "skills": {
+    id:"skills", cat:"field", color:"#1B5E20", bg:"#E8F5E9",
+    title:"Fullback Skills",
+    subtitle:"Catch, kick receipt, counter, line entry",
+    meta:["20-30 min","Position-specific","High quality"],
+    note:"These are the same fullback skill exercises, just with a lot more explanation so each rep tells you exactly what you are training.",
+    sections:[
+      { title:"Kick Receipt", exercises:[
+        { name:"Throw-and-Go High Ball", load:"8 reps", steps:["Throw the ball high enough that you have to track it properly, not just wait under it.", "Find the ball early with your eyes and move your feet to get underneath it.", "Catch above the forehead line with strong hands rather than letting the ball drop into the chest.", "Land balanced and square so you are ready for the next action immediately.", "Reset and make each rep look like a genuine aerial contest."], cue:"Own the aerial contest — early eyes, strong hands, balanced landing." },
+        { name:"Sprint-Then-Receive", load:"8 reps", steps:["Sprint out first so the catch happens under fatigue and movement stress.", "Turn late enough that you still have to organise the body under pressure.", "Receive the ball cleanly with eyes and hands working early.", "Square up quickly after the catch so you can attack or pass straight away.", "Do not let the drill become a lazy jog into an easy catch."], cue:"Catch under movement stress — organise fast after turning." },
+        { name:"Catch-to-Attack Zero Pause", load:"8 reps", steps:["Start in a receiving position and take the ball cleanly.", "As soon as you catch, move straight into your footwork or carry line.", "There should be no dead step or pause after the catch.", "Commit to the line as if the defence is in front of you.", "Reset and repeat with full intent so it trains instant transition."], cue:"Receiver to runner instantly — no catch, stop, then think." }
+      ]},
+      { title:"Counter-Attack / Scenario", exercises:[
+        { name:"Kick-Read-Counter", load:"10 reps", steps:["Catch the kick cleanly first — the skill still starts with secure possession.", "As soon as you land or settle, scan for the cone or cue that tells you where space is.", "Make the decision quickly and commit to it without hesitation.", "Burst into space immediately once you’ve made the read.", "Finish every rep like a genuine counter-attack, not a half-speed jog."], cue:"Decision then speed — read fast, then go." },
+        { name:"Receive → Enter Line", load:"10 reps", steps:["Catch the ball in a fullback position with enough depth to simulate game spacing.", "Arc into the line rather than running straight and flat too early.", "Time the entry so you hit pace through the gate or target zone.", "Stay square for as long as possible before committing.", "Think like you are joining support, not just ticking off a cone drill."], cue:"Timing into the line matters — arrive late and fast, not early and static." },
+        { name:"Full Chain Randomised", load:"12-15 reps", steps:["Change the scenario each rep so you do not know exactly what is coming.", "This could involve a catch, scan, footwork, pass option or counter line.", "Commit to your first good read rather than hesitating and second-guessing.", "Move at genuine game speed so the decision actually gets tested.", "Reset quickly and keep the reps varied so the drill feels live."], cue:"Trust your decisions — read, commit, go." }
+      ]},
+      { title:"Walk-Through / Light Day", exercises:[
+        { name:"Light Catch and Positioning Walk-Through", load:"10 min", steps:["Keep this one light — easy jogs, clean catches and clear positioning work only.", "Talk yourself through where you would stand and move in different backfield situations.", "Use the ball-handling to stay sharp without building fatigue.", "This is more rehearsal than training load.", "Finish the session feeling switched on and fresh."], cue:"Day 14 freshness — stay sharp without draining the legs." }
+      ]}
+    ]
+  },
+
+  "conditioning": {
+    id:"conditioning", cat:"field", color:"#4A235A", bg:"#F5EEF8",
+    title:"Conditioning Finisher",
+    subtitle:"Short, sharp, skill-aware conditioning",
+    meta:["10-12 min","Quality under fatigue","Keep skill clean"],
+    note:"This keeps the same conditioning finishers, but with much more explanation so you know exactly how hard and how clean they should be.",
+    sections:[
+      { title:"Conditioning Options", exercises:[
+        { name:"40m RSA + Ground Start", load:"8×40m", steps:["Start each rep from the ground exactly as programmed so the effort begins from a realistic reset.", "Hit the 40m hard, but keep sprint mechanics as clean as possible.", "Do not let the body position fall apart just because you are tired.", "If sprint quality drops badly, take a bit more rest rather than turning it into junk conditioning.", "The aim is repeat-effort speed, not survival."], cue:"Do not turn this into a slog — hard reps, still technical." },
+        { name:"22m Sprint + Catch Combo", load:"2×5 reps", steps:["Sprint the 22m first with intent so the catch happens under fatigue.", "As soon as the sprint ends, complete the catch task without a big reset.", "Keep hands and eyes organised even though breathing is elevated.", "Use short turnarounds, but not so short that every rep becomes sloppy.", "The goal is to keep skill quality when the body is under pressure."], cue:"Skill stays clean under fatigue — breathing hard is not an excuse for poor hands." },
+        { name:"22m Down-Up Returns", load:"2×5 reps", steps:["Start with a clean down-up rather than crashing messily into the ground.", "Pop back to feet quickly and sprint the 22m with intent.", "Turn efficiently and return without wasting extra steps.", "Keep body height and movement efficient through the floor transition.", "Treat it like repeat-effort work you might hit in a broken-play sequence."], cue:"Game-style repeat effort — efficient to ground, efficient back out." }
+      ]}
+    ]
+  },
+
+  "conversions": {
+    id:"conversions", cat:"field", color:"#8C4A00", bg:"#FFF3E0",
+    title:"Conversion Kicking",
+    subtitle:"Main comparison days only",
+    meta:["10 min","Track makes","Keep routine stable"],
+    note:"Same kicking log focus — in front, left angle, right angle.",
+    sections:[{ title:"Kicking Menu", exercises:[
+      { name:"In-Front Conversions", load:"10 attempts", steps:["15-25m in front.","Use your normal routine.","Log makes and attempts."], cue:"Groove, don’t rush." },
+      { name:"Left-Angle Conversions", load:"10 attempts", steps:["20-25m at angle.","Open to target.","Finish through the line."], cue:"Compare left vs right." },
+      { name:"Right-Angle Conversions", load:"10 attempts", steps:["20-25m at angle.","Same routine every rep.","Log honestly."], cue:"Technique first." }
+    ]}]
+  },
+
+  "film": {
+    id:"film", cat:"film", color:"#4A235A", bg:"#F5EEF8",
+    title:"Film Study",
+    subtitle:"30 min each programmed film day",
+    meta:["30 min","Take notes","Fullback focus"],
+    note:"Film stays in the app. Use three notes every time: positioning, decision, one thing to copy.",
+    sections:[{ title:"14-Day Film Menu", exercises:[
+      { name:"Day 1 — Fullback Baseline", load:"30 min", steps:["Watch fullback starting position.","Note depth and scanning.","Write one thing to apply immediately."], cue:"Not passive watching." },
+      { name:"Day 2 — Aerial Composure", load:"30 min", steps:["Watch hand position.","Watch call timing.","Write three notes."], cue:"Track the catch details." },
+      { name:"Day 3 — First Two Steps After Catch", load:"30 min", steps:["Watch first movement post-catch.","Notice decision speed.","Write what you want to copy."], cue:"Receiver to attacker." },
+      { name:"Day 4 — Pendulum / Backfield Shape", load:"30 min", steps:["Watch back-three movement.","Sketch the pendulum.","Note depth cues."], cue:"Positioning lesson." },
+      { name:"Day 5 — Communication in Backfield", load:"30 min", steps:["Watch the fullback direct others.","Find two comms moments.","Note exact calls."], cue:"Fullback voice matters." },
+      { name:"Day 6 — Attack From Kick Receipt", load:"30 min", steps:["Watch body angle on catch.","Count scan-to-decision time.","Write one takeaway."], cue:"Catch to attack speed." },
+      { name:"Day 7 — Rest Day Review", load:"30 min", steps:["Review notes from the week.","Re-watch your weakest topic.","Write three positional reminders."], cue:"Consolidate." },
+      { name:"Day 8 — High Ball Pressure", load:"30 min", steps:["Watch jump timing.","Track eyes and hands.","Write one aerial cue."], cue:"Pressure catching." },
+      { name:"Day 9 — Counter-Attack Triggers", load:"30 min", steps:["Watch when the fullback runs vs passes vs kicks.","Note the trigger.","Write what you missed before."], cue:"Decision clarity." },
+      { name:"Day 10 — Scenario Reading", load:"30 min", steps:["Watch multiple scenarios.","Pause and predict the decision.","Compare to the actual choice."], cue:"Read before react." },
+      { name:"Day 11 — Recovery Review", load:"30 min", steps:["Light review only.","Revisit your own notes.","Keep the brain sharp but fresh."], cue:"Low stress." },
+      { name:"Day 12 — Backfield Positioning Again", load:"30 min", steps:["Watch spacing in the backfield.","Look at wing-fullback connection.","Write two positioning cues."], cue:"Positional detail." },
+      { name:"Day 13 — Line Entry Timing", load:"30 min", steps:["Watch arc run timing.","Watch how early they commit.","Note trigger to enter."], cue:"Join the line with intent." },
+      { name:"Day 14 — Round 1 Prep Review", load:"20-30 min", steps:["Review your best notes only.","Visualise your first involvements.","Finish confident."], cue:"Clarity over volume." }
+    ]}]
+  },
+
+  "recovery": {
+    id:"recovery", cat:"film", color:"#007B8A", bg:"#E0F4F6",
+    title:"Recovery Protocol",
+    subtitle:"Active recovery day rules",
+    meta:["20-30 min","Light","Restore"],
+    note:"Same recovery intent. If readiness is low, recovery replaces the whole day.",
+    sections:[{ title:"Recovery Day", exercises:[
+      { name:"Easy Bike / Jog / Row", load:"20-25 min", steps:["Keep RPE 4 or lower.","Nasal breathing if possible.","Finish fresher than you started."], cue:"This is restoration, not fitness chasing." },
+      { name:"Foam Roll + Soft Tissue", load:"10 min", steps:["Quads, calves, thoracic, glutes.","Pause on tight spots.","Keep pressure tolerable."], cue:"Clean up tissue quality." },
+      { name:"Short Stretch Flow", load:"1A + 1B", steps:["Morning routine.","Night routine.","Do not skip just because it is a recovery day."], cue:"Consistency beats intensity here." }
+    ]}]
+  }
+};
+
+const SESSION_META = {
+  "1a":  { icon:"🧘", label:"1A Morning Stretch", color:"#F5EEF8", tc:"#5C2D91", dur:"7-8 min" },
+  "1b":  { icon:"🌙", label:"1B Night Stretch", color:"#F5EEF8", tc:"#5C2D91", dur:"7-8 min" },
+  "1c":  { icon:"🧘", label:"1C Pre-Gym Warm-Up", color:"#F5EEF8", tc:"#5C2D91", dur:"12-14 min" },
+  "1d":  { icon:"⚡", label:"1D Pre-Field Warm-Up", color:"#E8F5E9", tc:"#1B5E20", dur:"8-10 min" },
+  "gymLA":{ icon:"🏋️", label:"Gym — Lower A", color:"#EBF2F8", tc:"#1A3560", dur:"~65 min (Hevy)" },
+  "gymLB":{ icon:"🏋️", label:"Gym — Lower B", color:"#EBF2F8", tc:"#1A3560", dur:"~70 min (Hevy)" },
+  "gymUA":{ icon:"🏋️", label:"Gym — Upper A", color:"#EBF2F8", tc:"#1A3560", dur:"~65 min (Hevy)" },
+  "gymUB":{ icon:"🏋️", label:"Gym — Upper B", color:"#EBF2F8", tc:"#1A3560", dur:"~60 min (Hevy)" },
+  "speedW1":{ icon:"💨", label:"Speed — Week 1", color:"#E8F5E9", tc:"#1B5E20", dur:"10-15 min" },
+  "speedW2":{ icon:"💨", label:"Speed — Week 2", color:"#E8F5E9", tc:"#1B5E20", dur:"15 min" },
+  "agility":{ icon:"🔀", label:"Agility — Reactive COD", color:"#FFF3E0", tc:"#8C4A00", dur:"10 min" },
+  "skills": { icon:"🏉", label:"Fullback Skills", color:"#E8F5E9", tc:"#1B5E20", dur:"20-30 min" },
+  "conditioning":{ icon:"🔥", label:"Conditioning Finisher", color:"#F5EEF8", tc:"#4A235A", dur:"10-12 min" },
+  "conversions":{ icon:"🎯", label:"Conversion Kicking", color:"#FFF3E0", tc:"#8C4A00", dur:"10 min" },
+  "film":   { icon:"🎬", label:"Film Study", color:"#F5EEF8", tc:"#4A235A", dur:"30 min" },
+  "recovery":{ icon:"💤", label:"Recovery Protocol", color:"#E0F4F6", tc:"#007B8A", dur:"20-30 min" }
+};
+
+const DAY_TASKS = {
+  1:  { sessions:["1c","gymLA","1d","speedW1","agility","skills","conditioning","conversions","film","1b"] },
+  2:  { sessions:["1c","gymUA","film","1b"] },
+  3:  { sessions:["1a","1d","speedW1","agility","skills","conditioning","conversions","film","1b"] },
+  4:  { sessions:["1a","recovery","film","1b"] },
+  5:  { sessions:["1c","gymLB","film","1b"] },
+  6:  { sessions:["1a","1d","skills","conversions","conditioning","film","1b"] },
+  7:  { sessions:["1a","film","1b"] },
+  8:  { sessions:["1c","gymLA","1d","speedW2","agility","skills","conditioning","conversions","film","1b"] },
+  9:  { sessions:["1c","gymUA","film","1b"] },
+  10: { sessions:["1a","1d","speedW2","agility","skills","conditioning","conversions","film","1b"] },
+  11: { sessions:["1a","recovery","film","1b"] },
+  12: { sessions:["1c","gymLB","film","1b"] },
+  13: { sessions:["1a","1d","agility","skills","conversions","conditioning","film","1b"] },
+  14: { sessions:["1c","gymUB","1d","skills","film","1b"] }
+};
+
+const DAYS = [
+  { d:1,w:1,title:"Lower A Gym + Field (Speed Day 1)",badges:["double","gym","field","film"],sections:[
+    { t:"Morning", items:["1C pre-gym warm-up","Record readiness, hamstring and sleep"] },
+    { t:"Gym — Lower A (track in Hevy)", items:["Open Hevy → Lower A","Updated split now loaded: Depth jump / broad jump / lateral bound / hip flexor drives • keep jumps fast and low fatigue","Main power: trap bar jump + hang power clean + quarter squat jump • all explosive, not grindy","Strength finish: RDL + standing calf raise","Core finish: leg raises + plank"] },
+    { t:"Pre-Field", items:["Minimum 4 hours after gym","1D pre-field warm-up"] },
+    { t:"Field", items:["Speed: Wall drive sprint 5×20m","Speed: Falling start sprint 4×20m","Agility: 4-cone box react 8 reps","Agility: 5-10-5 shuttle 6 reps","Skills: Throw-and-go high ball / catch-to-attack","Conditioning finisher","Conversion kicking"] },
+    { t:"Film Study", items:["Watch Day 1 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch","Log session RPE and speed quality"] }
+  ]},
+  { d:2,w:1,title:"Upper A Gym",badges:["gym","film"],sections:[
+    { t:"Morning", items:["1C pre-gym warm-up","Record readiness, hamstring and sleep"] },
+    { t:"Gym — Upper A (track in Hevy)", items:["Open Hevy → Upper A","Updated split now loaded: plyo push-up / rotational scoop throw / box jump","Strength block: push press + incline DB + single-arm row + face pull + weighted dips • set shoulders and stay crisp","Robustness: Copenhagen plank + landmine 180 + dead hang"] },
+    { t:"Film Study", items:["Watch Day 2 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch","Log session RPE"] }
+  ]},
+  { d:3,w:1,title:"Field Only (Speed Day 2)",badges:["field","film"],sections:[
+    { t:"Morning", items:["1A morning stretch","Record readiness, hamstring and sleep"] },
+    { t:"Pre-Field", items:["1D pre-field warm-up"] },
+    { t:"Field", items:["Speed: Standing start sprint 5×20m","Speed: Flying 30 — 4 reps","Agility: reactive COD menu","Skills: counter-attack + line-entry menu","Conditioning finisher","Conversion kicking"] },
+    { t:"Film Study", items:["Watch Day 3 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch","Log speed quality"] }
+  ]},
+  { d:4,w:1,title:"Active Recovery",badges:["rest","film"],sections:[
+    { t:"Morning", items:["1A morning stretch","Readiness check"] },
+    { t:"Recovery", items:["Easy bike/jog/row 20-25 min","Foam roll + soft tissue","Keep it easy"] },
+    { t:"Film Study", items:["Watch Day 4 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch"] }
+  ]},
+  { d:5,w:1,title:"Lower B Gym",badges:["gym","film"],sections:[
+    { t:"Morning", items:["1C pre-gym warm-up","Record readiness, hamstring and sleep"] },
+    { t:"Gym — Lower B (track in Hevy)", items:["Open Hevy → Lower B","Updated split now loaded: pogo hops / ankle pogos / band high knee drive","Strength block: trap bar deadlift + machine hip thrust + Bulgarian split squat + Nordics + weighted calf raise • brace hard and own the eccentric work","Robustness: Copenhagen plank + Pallof press"] },
+    { t:"Film Study", items:["Watch Day 5 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch","Log session RPE"] }
+  ]},
+  { d:6,w:1,title:"Field Skills + Kicking",badges:["field","film"],sections:[
+    { t:"Morning", items:["1A morning stretch","Record readiness"] },
+    { t:"Pre-Field", items:["1D pre-field warm-up"] },
+    { t:"Field", items:["Skills: kick receipt / line entry / scenario menu","Conversion kicking","Short conditioning finisher"] },
+    { t:"Film Study", items:["Watch Day 6 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch"] }
+  ]},
+  { d:7,w:1,title:"Full Rest",badges:["rest","film"],sections:[
+    { t:"Morning", items:["1A morning stretch"] },
+    { t:"Review", items:["Week review","Visualisation","Read your notes"] },
+    { t:"Film Study", items:["Watch Day 7 review film routine"] },
+    { t:"Night", items:["1B night stretch"] }
+  ]},
+  { d:8,w:2,title:"Lower A Gym + Field (Speed Day 3)",badges:["double","gym","field","film"],sections:[
+    { t:"Morning", items:["1C pre-gym warm-up","Record readiness, hamstring and sleep"] },
+    { t:"Gym — Lower A (track in Hevy)", items:["Open Hevy → Lower A","Same updated Lower A split","Progress loads only if quality stays high"] },
+    { t:"Pre-Field", items:["Minimum 4 hours after gym","1D pre-field warm-up"] },
+    { t:"Field", items:["Speed: Wall drive sprint 5×20m","Speed: Flying 30 — 5 reps","Agility: reactive COD","Skills: high ball pressure + catch-to-attack","Conditioning finisher","Conversion kicking"] },
+    { t:"Film Study", items:["Watch Day 8 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch","Log session RPE and speed quality"] }
+  ]},
+  { d:9,w:2,title:"Upper A Gym",badges:["gym","film"],sections:[
+    { t:"Morning", items:["1C pre-gym warm-up","Record readiness, hamstring and sleep"] },
+    { t:"Gym — Upper A (track in Hevy)", items:["Open Hevy → Upper A","Same updated Upper A split","Progress slightly if movement quality is strong"] },
+    { t:"Film Study", items:["Watch Day 9 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch","Log session RPE"] }
+  ]},
+  { d:10,w:2,title:"Field Only (Speed Day 4 — Peak Velocity)",badges:["field","film"],sections:[
+    { t:"Morning", items:["1A morning stretch","Record readiness, hamstring and sleep"] },
+    { t:"Pre-Field", items:["1D pre-field warm-up"] },
+    { t:"Field", items:["Speed: Flying 40 — 4 reps","Speed: Arc sprint left + right","Agility: reactive COD","Skills: fullback scenario menu","Conditioning finisher","Conversion kicking"] },
+    { t:"Film Study", items:["Watch Day 10 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch","Log speed quality"] }
+  ]},
+  { d:11,w:2,title:"Active Recovery",badges:["rest","film"],sections:[
+    { t:"Morning", items:["1A morning stretch","Readiness check"] },
+    { t:"Recovery", items:["Easy bike/jog/row 20-25 min","Foam roll + soft tissue","Stay under RPE 4"] },
+    { t:"Film Study", items:["Watch Day 11 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch"] }
+  ]},
+  { d:12,w:2,title:"Lower B Gym",badges:["gym","film"],sections:[
+    { t:"Morning", items:["1C pre-gym warm-up","Record readiness, hamstring and sleep"] },
+    { t:"Gym — Lower B (track in Hevy)", items:["Open Hevy → Lower B","Same updated Lower B split","Stay explosive on the pogo and knee-drive work"] },
+    { t:"Film Study", items:["Watch Day 12 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch","Log session RPE"] }
+  ]},
+  { d:13,w:2,title:"Field Skills + Kicking",badges:["field","film"],sections:[
+    { t:"Morning", items:["1A morning stretch","Record readiness"] },
+    { t:"Pre-Field", items:["1D pre-field warm-up"] },
+    { t:"Field", items:["Agility: reactive COD","Skills: counter-attack + line-entry + scenario work","Conversion kicking","Short conditioning finisher"] },
+    { t:"Film Study", items:["Watch Day 13 film routine","Write 3 notes"] },
+    { t:"Night", items:["1B night stretch"] }
+  ]},
+  { d:14,w:2,title:"Upper B Gym + Light Field",badges:["double","gym","field","film"],sections:[
+    { t:"Morning", items:["1C pre-gym warm-up","Record readiness, hamstring and sleep"] },
+    { t:"Gym — Upper B (track in Hevy)", items:["Open Hevy → Upper B","Updated split now loaded: med ball scoop throw / single-leg box jump","Strength block: DB bench + chin-ups + landmine press + smith bench throws + explosive Pendlay row • clean power reps only","Robustness: dead hang + leg raises","Keep RPE ≤6 today — this is activation, not a smash session"] },
+    { t:"Light Field", items:["1D pre-field warm-up","Light catch / positioning walk-through","Short build-ups only if feeling fresh"] },
+    { t:"Film Study", items:["Watch Day 14 film routine","Review your best notes only"] },
+    { t:"Night", items:["1B night stretch","Round 1 visualisation"] }
+  ]}
+];
+
+const KICK_DAYS = [
+  { d:1, label:"Day 1" }, { d:3, label:"Day 3" }, { d:6, label:"Day 6" },
+  { d:8, label:"Day 8" }, { d:10, label:"Day 10" }, { d:13, label:"Day 13" }
+];
+const KICK_TYPES = ["In Front", "Left Angle", "Right Angle"];
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return JSON.parse(JSON.stringify(APP_DEFAULT));
+    return Object.assign({}, APP_DEFAULT, JSON.parse(raw));
+  } catch(e) {
+    return JSON.parse(JSON.stringify(APP_DEFAULT));
+  }
+}
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(APP)); }
+function exColor(cat){ return cat==='stretch' ? '#5C2D91' : cat==='gym' ? '#1A3560' : cat==='field' ? '#1B5E20' : '#4A235A'; }
+function exBg(cat){ return cat==='stretch' ? '#F5EEF8' : cat==='gym' ? '#EBF2F8' : cat==='field' ? '#E8F5E9' : '#F5EEF8'; }
+function dayDateLabel(dayNum){
+  const start = new Date('2026-04-06T12:00:00');
+  start.setDate(start.getDate() + (dayNum - 1));
+  return start.toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long' });
+}
+function badgeHTML(list){
+  const map = { gym:['b-gym','GYM'], field:['b-field','FIELD'], film:['b-film','FILM'], rest:['b-rest','REST'], double:['b-double','2X'] };
+  return (list || []).map(b => `<span class="badge ${map[b][0]}">${map[b][1]}</span>`).join('');
+}
+function getTaskDone(day, idx){ return !!(APP.checks[day] && APP.checks[day]['task_' + idx]); }
+function setTaskDone(day, idx, val){
+  APP.checks[day] = APP.checks[day] || {};
+  APP.checks[day]['task_' + idx] = !!val;
+  saveState();
+}
+function getTodayTasks(day){
+  const sessions = (DAY_TASKS[day]?.sessions || []);
+  return sessions.map((sid, i) => ({
+    sid,
+    idx: i,
+    title: SESSION_META[sid]?.label || sid,
+    dur: SESSION_META[sid]?.dur || '',
+    meta: SESSION_META[sid] || {}
+  }));
+}
+
+
+function getCategoryProgress(day){
+  const dayObj = DAYS.find(x => x.d === day);
+  const groups = { Stretch:{done:0,total:0}, Gym:{done:0,total:0}, Field:{done:0,total:0}, Film:{done:0,total:0}, Recovery:{done:0,total:0} };
+  if (!dayObj) return groups;
+  dayObj.sections.forEach(sec => {
+    let key = 'Field';
+    const title = sec.t.toLowerCase();
+    if (title.includes('morning') || title.includes('night') || title.includes('pre-gym') || title.includes('pre-field')) key = 'Stretch';
+    else if (title.includes('gym')) key = 'Gym';
+    else if (title.includes('film')) key = 'Film';
+    else if (title.includes('recovery')) key = 'Recovery';
+    else if (title.includes('review')) key = 'Film';
+    sec.items.forEach((_, i) => {
+      groups[key].total += 1;
+      if (APP.checks[day] && APP.checks[day][sec.t + '_' + i]) groups[key].done += 1;
+    });
+  });
+  Object.values(groups).forEach(v => v.pct = v.total ? Math.round((v.done / v.total) * 100) : 0);
+  return groups;
+}
+
+
+function getDayProgress(day){
+  const dayObj = DAYS.find(x => x.d === day);
+  if (!dayObj) return { done: 0, total: 0, pct: 0 };
+  let done = 0, total = 0;
+  dayObj.sections.forEach(sec => {
+    (sec.items || []).forEach((_, i) => {
+      total += 1;
+      if (APP.checks[day] && APP.checks[day][sec.t + '_' + i]) done += 1;
+    });
+  });
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  return { done, total, pct };
+}
+
+function getBlockTotals(){
+  let done = 0, total = 0, completeDays = 0;
+  for (let d = 1; d <= 14; d++) {
+    const p = getDayProgress(d);
+    done += p.done;
+    total += p.total;
+    if (p.total && p.done === p.total) completeDays++;
+  }
+  return { done, total, completeDays, pct: total ? Math.round((done / total) * 100) : 0 };
+}
+function showView(v){
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  const nav = document.getElementById('nav-' + v);
+  if (nav) nav.classList.add('active');
+
+  const sub = document.getElementById('header-sub');
+  if (sub) {
+    const labels = {
+      today: 'Today tracker • open a section and tick tasks as you go',
+      progress: 'Weekly progression • see completion across the block',
+      library: 'Routine library • gym, field, recovery and film detail',
+      kicking: 'Kicking log • store makes, attempts and percentages',
+      monitoring: 'Monitoring log • save readiness, sleep, RPE and sprint quality'
+    };
+    sub.textContent = labels[v] || 'Fullback block tracker';
+  }
+
+  if (v === 'today') renderToday();
+  if (v === 'progress') renderProgress();
+  if (v === 'library') renderLibrary();
+  if (v === 'kicking') renderKicking();
+  if (v === 'monitoring') renderMonitoring();
+}
+
+
+
+function sectionIcon(title){
+  const t = title.toLowerCase();
+  if (t.includes('gym')) return ['🏋️','var(--navy-bg)','var(--navy)'];
+  if (t.includes('field')) return ['🏉','var(--green-bg)','var(--green)'];
+  if (t.includes('film')) return ['🎬','var(--purple-bg)','var(--purple)'];
+  if (t.includes('recovery') || t.includes('review')) return ['💤','var(--teal-bg)','var(--teal)'];
+  if (t.includes('morning')) return ['🌅','var(--gold-bg)','var(--gold)'];
+  if (t.includes('night')) return ['🌙','var(--purple-bg)','var(--purple)'];
+  if (t.includes('pre')) return ['⚡','var(--orange-bg)','var(--orange)'];
+  return ['✓','var(--grey)','var(--muted)'];
+}
+
+
+
+
+
+
+
+
+function getSectionProgress(dayObj, sec){
+  const total = (sec.items || []).length;
+  let done = 0;
+  (sec.items || []).forEach((_, i) => {
+    if (APP.checks[dayObj.d] && APP.checks[dayObj.d][sec.t + '_' + i]) done++;
+  });
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  return {done, total, pct};
+}
+
+function getTodayCategoryStats(dayObj){
+  const defs = {
+    Stretch: {"done":0,"total":0,"icon":"🧘","color":"linear-gradient(135deg,#6E40B7,#8B67D3)"},
+    Gym: {"done":0,"total":0,"icon":"🏋️","color":"linear-gradient(135deg,#204A8C,#3C67AE)"},
+    Field: {"done":0,"total":0,"icon":"🏉","color":"linear-gradient(135deg,#1E7B31,#349557)"},
+    Film: {"done":0,"total":0,"icon":"🎬","color":"linear-gradient(135deg,#5A2B79,#7E44A1)"},
+    Recovery: {"done":0,"total":0,"icon":"💤","color":"linear-gradient(135deg,#0C7F8B,#1A9CAB)"}
+  };
+  if (!dayObj || !dayObj.sections) return defs;
+  dayObj.sections.forEach(sec => {
+    let key = 'Field';
+    const title = (sec.t || '').toLowerCase();
+    if (title.includes('morning') || title.includes('night') || title.includes('pre-gym') || title.includes('pre-field')) key = 'Stretch';
+    else if (title.includes('gym')) key = 'Gym';
+    else if (title.includes('film')) key = 'Film';
+    else if (title.includes('recovery')) key = 'Recovery';
+    else if (title.includes('review')) key = 'Film';
+    (sec.items || []).forEach((_, i) => {
+      defs[key].total += 1;
+      if (APP.checks[dayObj.d] && APP.checks[dayObj.d][sec.t + '_' + i]) defs[key].done += 1;
+    });
+  });
+  Object.values(defs).forEach(v => v.pct = v.total ? Math.round((v.done / v.total) * 100) : 0);
+  return defs;
+}
+
+function toggleTodaySection(dayNum, sectionIndex){
+  APP.todayOpenSection = (APP.todayOpenSection === `${dayNum}_${sectionIndex}`) ? null : `${dayNum}_${sectionIndex}`;
+  saveState();
+  renderToday();
+}
+
+
+function getGymRoutineForSectionTitle(sectionTitle){
+  const title = (sectionTitle || '').toLowerCase();
+  if (title.includes('lower a')) return ROUTINES.gymLA;
+  if (title.includes('upper a')) return ROUTINES.gymUA;
+  if (title.includes('lower b')) return ROUTINES.gymLB;
+  if (title.includes('upper b')) return ROUTINES.gymUB;
+  return null;
+}
+
+function buildGymExerciseHTML(sectionTitle){
+  const routine = getGymRoutineForSectionTitle(sectionTitle);
+  if (!routine || !routine.sections) return '';
+  return `
+    <div class="gym-ex-list">
+      <div class="gym-ex-title">Session Exercises</div>
+      ${routine.sections.map(sec => `
+        <div class="gym-ex-block">
+          <div class="gym-ex-block-title">${sec.title}</div>
+          ${sec.exercises.map(ex => `
+            <div class="gym-ex-row">
+              <div class="gym-ex-name">${ex.name}</div>
+              <div class="gym-ex-load">${ex.load || ''}</div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderToday(){
+  const dayNum = APP.selectedDay || 1;
+  const dayObj = DAYS.find(x => x.d === dayNum);
+  const wrap = document.getElementById('today-sections');
+  const prog = getDayProgress(dayNum);
+
+  document.getElementById('today-day-lbl').textContent = 'Day ' + dayNum;
+  document.getElementById('today-sub-lbl').textContent = dayDateLabel(dayNum) + ' • ' + (dayObj?.title || '');
+  document.getElementById('today-prog-fill').style.width = prog.pct + '%';
+
+  const heroPill = document.getElementById('today-hero-pill');
+  if (heroPill) heroPill.textContent = `${prog.pct}% Complete`;
+
+  if (!dayObj || !wrap) return;
+
+  wrap.innerHTML = dayObj.sections.map((sec, sIdx) => {
+    const sp = getSectionProgress(dayObj, sec);
+    const isOpen = APP.todayOpenSection === `${dayNum}_${sIdx}`;
+    const extraContent = sec.t.toLowerCase().includes('gym') ? buildGymExerciseHTML(sec.t) : '';
+
+    return `
+      <div class="today-section-card">
+        <div class="today-section-head" onclick="toggleTodaySection(${dayNum}, ${sIdx})">
+          <div class="today-section-info">
+            <div class="today-section-kicker">Section</div>
+            <div class="today-section-title">${sec.t}</div>
+            <div class="today-section-meta">${sp.done}/${sp.total} tasks complete</div>
+          </div>
+          <div class="today-section-pct">${sp.pct}%</div>
+          <div class="chevron ${isOpen ? 'open':''}">▼</div>
+        </div>
+        <div class="today-section-body ${isOpen ? 'open':''}">
+          ${sec.items.map((item, i) => {
+            const checked = !!(APP.checks[dayObj.d] && APP.checks[dayObj.d][sec.t + '_' + i]);
+            return `
+              <div class="check-item" data-day="${dayObj.d}" data-section="${encodeURIComponent(sec.t)}" data-idx="${i}" role="button" tabindex="0">
+                <div class="check-box ${checked ? 'checked':''}"></div>
+                <div class="check-label ${checked ? 'done':''}">${item}</div>
+              </div>
+            `;
+          }).join('')}
+          ${extraContent}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+function changeSelectedDay(delta){
+
+
+  APP.selectedDay = Math.max(1, Math.min(14, (APP.selectedDay || 1) + delta));
+  APP.week = APP.selectedDay <= 7 ? 1 : 2;
+  APP.todayOpenSection = null;
+  saveState();
+  renderToday();
+}
+
+function renderProgress(){
+  const wrap = document.getElementById('progress-content');
+  const days = DAYS.filter(x => x.w === APP.week);
+  const totals = getBlockTotals();
+  const weekDone = days.reduce((acc, day) => acc + getDayProgress(day.d).done, 0);
+  const weekTotal = days.reduce((acc, day) => acc + getDayProgress(day.d).total, 0);
+  const weekPct = weekTotal ? Math.round((weekDone / weekTotal) * 100) : 0;
+
+  wrap.innerHTML = `
+    <div class="progress-shell">
+      <div class="progress-banner">
+        <div class="progress-banner-kicker">Weekly progression</div>
+        <div class="progress-banner-title">Week ${APP.week} Dashboard</div>
+        <div class="progress-banner-sub">A cleaner view of how your block is moving — each day, each category, and what still needs work.</div>
+        <div class="progress-banner-row">
+          <div class="progress-banner-stat"><div class="num">${weekPct}%</div><div class="lbl">Week done</div></div>
+          <div class="progress-banner-stat"><div class="num">${totals.completeDays}/14</div><div class="lbl">Days locked</div></div>
+          <div class="progress-banner-stat"><div class="num">${totals.pct}%</div><div class="lbl">Whole block</div></div>
+        </div>
+      </div>
+      <div class="progress-grid">
+        ${days.map(day => {
+          const prog = getDayProgress(day.d);
+          const cats = getCategoryProgress(day.d);
+          return `
+            <div class="prog-card">
+              <div class="prog-top">
+                <div class="prog-left">
+                  <div class="prog-kicker">Day ${day.d}</div>
+                  <div class="prog-title">${day.title}</div>
+                  <div class="prog-date">${dayDateLabel(day.d)}</div>
+                </div>
+                <div class="prog-score">${prog.pct}%</div>
+              </div>
+              <div class="prog-bar-label"><span>Daily completion</span><span>${prog.done}/${prog.total} tasks</span></div>
+              <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${prog.pct}%"></div></div>
+              <div class="prog-cat-row">
+                ${Object.entries(cats).filter(([_, v]) => v.total > 0).map(([name, v]) => `
+                  <div class="prog-cat pc-${name.toLowerCase()}">
+                    <div class="prog-cat-name">${name}</div>
+                    <div class="prog-cat-pct">${v.pct}%</div>
+                    <div class="prog-cat-meta">${v.done}/${v.total} tasks</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('tab-w1').className = 'week-tab ' + (APP.week === 1 ? 'active-tab' : 'inactive-tab');
+  document.getElementById('tab-w2').className = 'week-tab ' + (APP.week === 2 ? 'active-tab' : 'inactive-tab');
+}
+function renderLibrary(){
+
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = CATS.map(cat => {
+    const routinesInCat = Object.values(ROUTINES).filter(r => r.cat === cat.id);
+    return `<div class="cat-card" onclick="openCategory('${cat.id}')">
+      <div class="cat-icon">${cat.icon}</div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-count">${routinesInCat.length} routine${routinesInCat.length!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+function openCategory(catId){
+  currentCat = catId;
+  const cat = CATS.find(c => c.id === catId);
+  const routines = Object.values(ROUTINES).filter(r => r.cat === catId);
+  document.getElementById('routine-list-title').textContent = cat.name;
+  document.getElementById('routine-list').innerHTML = routines.map(r => `
+    <div class="routine-list-item" onclick="openRoutineFromList('${r.id}')">
+      <div class="pill-icon" style="background:${r.bg};color:${r.color}">•</div>
+      <div class="rli-info">
+        <div class="rli-title">${r.title}</div>
+        <div class="rli-meta">${(r.meta || []).join(' · ')}</div>
+      </div>
+      <span class="rli-arrow">›</span>
+    </div>`).join('');
+  showOnlySubView('routines');
+}
+function openRoutineFromSession(sid){
+  detailBackTarget = 'today';
+  showRoutineDetail(sid);
+}
+function openRoutineFromList(rid){
+  detailBackTarget = 'routines';
+  showRoutineDetail(rid);
+}
+function backToLibrary(){ showOnlySubView('library'); }
+function backToRoutines(){ if (detailBackTarget === 'today') showView('today'); else showOnlySubView('routines'); }
+function showOnlySubView(v){
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+}
+function getContextSectionsForRoutine(r){
+  const day = APP.selectedDay || 1;
+  if (r.id === 'speedW1') {
+    if (day === 1) return r.sections.filter(s => /Day 1/i.test(s.title));
+    if (day === 3) return r.sections.filter(s => /Day 3/i.test(s.title));
+  }
+  if (r.id === 'speedW2') {
+    if (day === 8) return r.sections.filter(s => /Day 8/i.test(s.title));
+    if (day === 10) return r.sections.filter(s => /Day 10/i.test(s.title));
+    if (day === 14) return r.sections.filter(s => /Day 14/i.test(s.title));
+  }
+  if (r.id === 'film') {
+    const filmSection = (r.sections || [])[0];
+    if (!filmSection) return [];
+    const matchedExercise = (filmSection.exercises || []).find(ex => new RegExp('^Day\\s*' + day + '\\b', 'i').test(ex.name));
+    if (!matchedExercise) return [];
+    return [{ title: `Day ${day} Film Study`, exercises: [matchedExercise] }];
+  }
+  if (r.id === 'skills') {
+    if (day === 1) return r.sections.filter(s => /Kick Receipt/i.test(s.title));
+    if (day === 3) return r.sections.filter(s => /Counter-Attack/i.test(s.title));
+    if (day === 6) return r.sections.filter(s => /Kick Receipt|Counter-Attack/i.test(s.title));
+    if (day === 8) return r.sections.filter(s => /Kick Receipt/i.test(s.title));
+    if (day === 10) return r.sections.filter(s => /Counter-Attack/i.test(s.title));
+    if (day === 13) return r.sections.filter(s => /Counter-Attack/i.test(s.title));
+    if (day === 14) return r.sections.filter(s => /Walk-Through/i.test(s.title));
+  }
+  return r.sections;
+}
+function getCurrentRoutineTaskIndex(routineId){
+  const dayNum = APP.selectedDay || 1;
+  const tasks = getTodayTasks(dayNum);
+  return tasks.findIndex(t => t.sid === routineId);
+}
+function toggleCurrentRoutineDone(routineId){
+  const dayNum = APP.selectedDay || 1;
+  const idx = getCurrentRoutineTaskIndex(routineId);
+  if (idx === -1) return;
+  const current = getTaskDone(dayNum, idx);
+  setTaskDone(dayNum, idx, !current);
+  showRoutineDetail(routineId);
+  renderToday();
+  renderProgress();
+}
+function showRoutineDetail(id){
+  currentRoutine = id;
+  const r = ROUTINES[id];
+  if (!r) return;
+  const filteredSections = getContextSectionsForRoutine(r);
+  const day = APP.selectedDay || 1;
+  const routineTaskIdx = getCurrentRoutineTaskIndex(id);
+  const routineDone = routineTaskIdx !== -1 ? getTaskDone(day, routineTaskIdx) : false;
+  let contextSubtitle = 'Programmed for Day ' + day;
+  if (r.id === 'film') contextSubtitle = 'Film study programmed for Day ' + day;
+  if (r.id === 'speedW1' || r.id === 'speedW2') contextSubtitle = 'Speed block programmed for Day ' + day;
+  const content = document.getElementById('detail-content');
+  content.innerHTML = `
+    <div class="routine-title-card" style="background:${r.color}">
+      <h2>${r.title}</h2>
+      <p>${contextSubtitle}</p>
+      <div class="routine-meta-row">${(r.meta||[]).map(m => `<span class="rmeta">${m}</span>`).join('')}</div>
+    </div>
+    <div class="card small" style="line-height:1.45;background:${r.bg};color:${r.color};font-weight:600">${r.note || ''}</div>
+    <div class="routine-actions">
+      ${routineTaskIdx !== -1 ? `<button class="routine-action-btn ${routineDone ? 'secondary' : ''}" onclick="toggleCurrentRoutineDone('${id}')">${routineDone ? 'Mark Undone' : 'Mark Done'}</button>` : ''}
+      <button class="routine-action-btn secondary" onclick="backToRoutines()">Close</button>
+    </div>
+    ${(filteredSections || []).map(sec => `
+      <div class="sec-divider">${sec.title}</div>
+      ${(sec.exercises || []).map((ex, i) => `
+        <div class="ex-card">
+          <div class="ex-header" onclick="toggleExercise(this)">
+            <div class="row" style="flex:1;flex-wrap:nowrap">
+              <div class="ex-num" style="background:${exBg(r.cat)};color:${exColor(r.cat)}">${i+1}</div>
+              <div class="ex-main">
+                <div class="ex-name">${ex.name}</div>
+                <div class="ex-load">${ex.load || ''}</div>
+              </div>
+            </div>
+            <span class="ex-chevron">▼</span>
+          </div>
+          <div class="ex-body">
+            ${(ex.steps || []).map((s, j) => `
+              <div class="ex-step">
+                <div class="step-num" style="background:${exBg(r.cat)};color:${exColor(r.cat)}">${j+1}</div>
+                <p>${s}</p>
+              </div>`).join('')}
+            ${ex.cue ? `<div class="cue-box"><div class="cue-label">Coaching Cue</div><p>${ex.cue}</p></div>` : ''}
+          </div>
+        </div>`).join('')}
+    `).join('')}
+    ${r.cat === 'gym' ? `<div class="hevy-note">Use Hevy to log loads, sets and reps for this gym session. This version keeps the app structure the same but swaps in your finished gym split.</div>` : ''}
+  `;
+  showOnlySubView('detail');
+}
+function toggleExercise(header){
+  const card = header.parentElement;
+  const body = card.querySelector('.ex-body');
+  const chev = card.querySelector('.ex-chevron');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+function confirmReset(){
+  const wrap = document.getElementById('reset-confirm-wrap');
+  wrap.innerHTML = `<div class="inline-confirm">
+    <div class="inline-confirm-title">Reset all block progress?</div>
+    <div class="muted small">This clears checklist ticks, monitoring and kicking logs.</div>
+    <div class="inline-confirm-actions">
+      <button class="confirm-cancel" onclick="cancelReset()">Cancel</button>
+      <button class="confirm-danger" onclick="doReset()">Reset</button>
+    </div>
+  </div>`;
+}
+function cancelReset(){ document.getElementById('reset-confirm-wrap').innerHTML = ''; }
+function doReset(){
+  localStorage.removeItem(STORAGE_KEY);
+  APP = loadState();
+  document.getElementById('reset-confirm-wrap').innerHTML = '';
+  renderToday(); renderProgress(); renderKicking(); renderMonitoring(); renderLibrary();
+}
+
+
+document.addEventListener('click', function(e){
+  const item = e.target.closest('.today-section-body .check-item');
+  if (!item) return;
+  const day = item.getAttribute('data-day');
+  const sec = decodeURIComponent(item.getAttribute('data-section') || '');
+  const idx = item.getAttribute('data-idx');
+  if (day !== null && sec !== null && idx !== null) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleItem(Number(day), sec, Number(idx));
+  }
+});
+
+
+function showWeek(w){
+  APP.week = w;
+  saveState();
+  renderProgress();
+}
+
+function toggleItem(d, secTitle, idx){
+  APP.checks[d] = APP.checks[d] || {};
+  const key = secTitle + '_' + idx;
+  APP.checks[d][key] = !APP.checks[d][key];
+  saveState();
+  renderToday();
+  renderProgress();
+}
+
+function saveKickField(key, field, value){
+  APP.kicking[key] = APP.kicking[key] || {};
+  APP.kicking[key][field] = value;
+  saveState();
+  const rec = APP.kicking[key] || {};
+  const pctEl = document.getElementById('kick-pct-' + key);
+  if (pctEl) pctEl.textContent = pct(rec.m, rec.a);
+}
+
+function pct(m, a){
+  const mm = Number(m || 0), aa = Number(a || 0);
+  if (!aa) return '0%';
+  return Math.round((mm / aa) * 100) + '%';
+}
+
+function renderKicking(){
+  const wrap = document.getElementById('kicking-log');
+  if (!wrap) return;
+  wrap.innerHTML = KICK_DAYS.map(day => `
+    <div class="log-card">
+      <div class="log-header">${day.label}</div>
+      ${KICK_TYPES.map((name, idx) => {
+        const key = `${day.d}_${idx}`;
+        const rec = APP.kicking[key] || {};
+        return `
+          <div class="kick-row">
+            <div class="kick-name">${name}</div>
+            <div class="kick-inputs">
+              <input type="number" min="0" max="50" value="${rec.m || ''}" onchange="saveKickField('${key}','m',this.value)" onblur="saveKickField('${key}','m',this.value)">
+              <span class="kick-slash">/</span>
+              <input type="number" min="0" max="50" value="${rec.a || ''}" onchange="saveKickField('${key}','a',this.value)" onblur="saveKickField('${key}','a',this.value)">
+              <div class="kick-pct" id="kick-pct-${key}">${pct(rec.m, rec.a)}</div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `).join('');
+}
+
+function saveMon(d){
+  const r = document.getElementById('mon-r-' + d)?.value || '';
+  const h = document.getElementById('mon-h-' + d)?.value || '';
+  const s = document.getElementById('mon-s-' + d)?.value || '';
+  const rpe = document.getElementById('mon-rpe-' + d)?.value || '';
+  const q = document.getElementById('mon-q-' + d)?.value || '';
+  APP.monitoring[d] = { r, h, s, rpe, q };
+  saveState();
+
+  const card = document.getElementById('mon-save-' + d)?.closest('.log-card');
+  const statusRow = card ? card.querySelector('.log-row strong') : null;
+  if (statusRow) statusRow.textContent = `${r || '-'} / ${h || '-'} / ${s || '-'}h / RPE ${rpe || '-'} / ${q || '-'}`;
+
+  const btn = document.getElementById('mon-save-' + d);
+  if (btn) {
+    const old = btn.textContent;
+    btn.textContent = 'Saved ✓';
+    btn.classList.add('saved');
+    setTimeout(() => {
+      btn.textContent = old;
+      btn.classList.remove('saved');
+    }, 1200);
+  }
+}
+
+function renderMonitoring(){
+  const wrap = document.getElementById('monitoring-log');
+  if (!wrap) return;
+  wrap.innerHTML = Array.from({length:14}, (_,i) => i + 1).map(d => {
+    const rec = APP.monitoring[d] || {};
+    return `
+      <div class="log-card">
+        <div class="log-header">Day ${d} — ${dayDateLabel(d)}</div>
+        <div class="monitoring">
+          <div class="mon-field"><label>Readiness</label><select id="mon-r-${d}">
+            <option value="">-</option>
+            <option value="1" ${rec.r === '1' ? 'selected' : ''}>1</option>
+            <option value="2" ${rec.r === '2' ? 'selected' : ''}>2</option>
+            <option value="3" ${rec.r === '3' ? 'selected' : ''}>3</option>
+            <option value="4" ${rec.r === '4' ? 'selected' : ''}>4</option>
+            <option value="5" ${rec.r === '5' ? 'selected' : ''}>5</option>
+          </select></div>
+          <div class="mon-field"><label>Hamstring</label><select id="mon-h-${d}">
+            <option value="">-</option>
+            <option value="Green" ${rec.h === 'Green' ? 'selected' : ''}>Green</option>
+            <option value="Amber" ${rec.h === 'Amber' ? 'selected' : ''}>Amber</option>
+            <option value="Red" ${rec.h === 'Red' ? 'selected' : ''}>Red</option>
+          </select></div>
+          <div class="mon-field"><label>Sleep (hrs)</label><input id="mon-s-${d}" type="number" min="0" max="12" step="0.5" value="${rec.s || ''}" /></div>
+          <div class="mon-field"><label>Session RPE</label><input id="mon-rpe-${d}" type="number" min="1" max="10" step="1" value="${rec.rpe || ''}" /></div>
+          <div class="mon-field wide"><label>Sprint Quality</label><select id="mon-q-${d}">
+            <option value="">-</option>
+            <option value="Fast" ${rec.q === 'Fast' ? 'selected' : ''}>Fast</option>
+            <option value="OK" ${rec.q === 'OK' ? 'selected' : ''}>OK</option>
+            <option value="Slow" ${rec.q === 'Slow' ? 'selected' : ''}>Slow</option>
+          </select></div>
+        </div>
+        <div class="mon-save-row"><button class="mon-save-btn save-state-btn" id="mon-save-${d}" onclick="saveMon(${d})">Save Day ${d} Monitoring</button></div>
+        <div class="log-row"><span>Current status</span><strong>${rec.r || '-'} / ${rec.h || '-'} / ${rec.s || '-'}h / RPE ${rec.rpe || '-'} / ${rec.q || '-'}</strong></div>
+      </div>
+    `;
+  }).join('');
+}
+
+(function init(){
+  renderToday();
+  renderProgress();
+  renderLibrary();
+  renderKicking();
+  renderMonitoring();
+})();
+</script>
+</body>
+</html>
